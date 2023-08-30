@@ -58,7 +58,6 @@ class Solver:
             if n != n_target:
                 x_rel = body.x - self._bodies[n_target].x
                 x_rel_mag = np.linalg.norm(x_rel, ord=1)
-                # F_g += np.dot((self._G * self._bodies[n_target].m * body.m) / x_rel_mag ** 2, x_rel / x_rel_mag)
                 F_g += (self._G * self._bodies[n_target].m * self._bodies[n].m * x_rel) / (x_rel_mag ** 3)
 
         return F_g
@@ -71,7 +70,7 @@ class Solver:
         """
 
         state_derivative = np.zeros((len(self._bodies), 6))
-        for n, body in enumerate(self._bodies):
+        for n, _ in enumerate(self._bodies):
             state_derivative[n, :3] = state_vec[n, 3:]
             state_derivative[n, 3:] = self._compute_F_g(n_target=n) / self._bodies[n].m
 
@@ -129,6 +128,10 @@ class Solver:
             if self._debug:
                 print(f"\nInstance: {i}, Time: {t} s")
                 for n, body in enumerate(self._bodies):
-                    print(f"n: {n}\tx: {np.round(body.x)}\tv: {np.round(body.v)}\ta: {np.round(body.a)}\tF_g: {np.round(body.F_g)}")
+                    print(f"""n: {n}
+                    \tx: {np.round(body.x)}
+                    \tv: {np.round(body.v)}
+                    \ta: {np.round(body.a)}
+                    \tF_g: {np.round(body.F_g)}""")
 
         return Results(bodies=self._bodies)
