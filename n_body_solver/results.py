@@ -1,3 +1,6 @@
+import os
+import time
+
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -11,10 +14,19 @@ class Results:
         """
 
         self._bodies: list[np.array] = bodies
+        self._name: str = str(time.strftime("%d-%m-%y %H-%M-%S"))
 
     @property
     def bodies(self) -> list[np.array]:
         return self._bodies
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @name.setter
+    def name(self, value: str) -> None:
+        self._name = value
 
     def save_plot(self, fig) -> None:
         """
@@ -61,3 +73,21 @@ class Results:
             self.save_plot(fig=fig)
 
         return fig
+
+    def save_solution(self, path: str = None) -> None:
+        """
+
+        :param path:
+        :return:
+        """
+
+        if path is None:
+            path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "solutions", self._name)
+            os.mkdir(path)
+
+        for n, body in enumerate(self._bodies):
+            body_path = os.path.join(path, f"n_{n}")
+            if not os.path.isdir(body_path):
+                os.mkdir(body_path)
+
+            body.data.to_csv(os.path.join(body_path, f"n_{n}_data.csv"), index=False)

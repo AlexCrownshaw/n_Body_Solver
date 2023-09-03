@@ -31,7 +31,7 @@ class Body:
         """ State vector declaration """
         self._state_vec = np.array([self._x, self._v, self._a])
 
-        self._data = pd.DataFrame(columns=["time",
+        self._data = pd.DataFrame(columns=["iteration", "time",
                                            "x", "y", "z",
                                            "v_x", "v_y", "v_z",
                                            "a_x", "a_y", "a_z",
@@ -85,13 +85,13 @@ class Body:
     def data(self) -> pd.DataFrame:
         return self._data
 
-    def store_state(self, t: float) -> None:
+    def store_state(self, i: int, t: float) -> None:
         """
 
         :return:
         """
 
-        self._data.loc[len(self._data)] = [t,
+        self._data.loc[len(self._data)] = [i, t,
                                            self._x[0], self._x[1], self._x[2],
                                            self._v[0], self._v[1], self._v[2],
                                            self._a[0], self._a[1], self._a[2],

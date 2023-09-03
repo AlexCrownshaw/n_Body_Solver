@@ -96,7 +96,7 @@ class Solver:
 
         return np.append(self._bodies[n].x, self._bodies[n].v)
 
-    def _update_bodies(self, state_vec: np.array, t: float) -> None:
+    def _update_bodies(self, state_vec: np.array, i: int, t: float) -> None:
         """
 
         :param state_vec:
@@ -107,7 +107,7 @@ class Solver:
             body.x = state_vec[n, :3]
             body.v = state_vec[n, 3:]
             body.a = self._compute_F_g(n_target=n) / self._bodies[n].m
-            body.store_state(t=t)
+            body.store_state(i=i, t=t)
 
     def solve(self) -> Results:
         """
@@ -123,7 +123,7 @@ class Solver:
             else:
                 state_vec = self._compute_iteration()
 
-            self._update_bodies(state_vec=state_vec, t=t)
+            self._update_bodies(state_vec=state_vec, i=i, t=t)
 
             if self._debug:
                 print(f"\nInstance: {i}, Time: {t} s")
