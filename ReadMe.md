@@ -1,14 +1,16 @@
 ##Usage examples
 
 ```python
-import numpy as np
+iimport numpy as np
 
 from n_body_solver.solver import Solver
 from n_body_solver.body import Body
 
 """ PARAMETERS START """
-ITERATIONS = 1000
-DT = 0.1
+ITERATIONS = 10000
+DT = 5
+
+MASS_345 = 1e20
 """ PARAMETERS STOP """
 
 
@@ -38,10 +40,23 @@ def orbit():
     results = solver.solve()
     results.save_solution()
     results.plot_trajectory(show=True)
+    results.animate_solution()
+
+
+def three_four_five():
+    n1 = Body(m=MASS_345, x=[300e3, 0, 0])
+    n2 = Body(m=MASS_345, x=[0, 400e3, 0])
+    n3 = Body(m=MASS_345, x=[0, 0, 0])
+
+    solver = Solver(bodies=[n1, n2, n3], iterations=ITERATIONS, dt=DT)
+    results = solver.solve()
+    results.plot_trajectory()
+    results.animate_solution(frames=100)
 
 
 if __name__ == "__main__":
     three_body()
     orbit()
+    three_four_five()
 
 ```
