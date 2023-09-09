@@ -16,7 +16,8 @@ class Results:
         """
 
         self._bodies: list[np.array] = bodies
-        self._name: str = str(time.strftime("%d-%m-%y %H-%M-%S"))
+        self._name: str = self.get_solution_name()
+        self._solution_path: str = ""
 
     @property
     def bodies(self) -> list[np.array]:
@@ -30,14 +31,63 @@ class Results:
     def name(self, value: str) -> None:
         self._name = value
 
-    def save_plot(self, fig) -> None:
+    @property
+    def solution_path(self) -> str:
+        return self._solution_path
+
+    @solution_path.setter
+    def solution_path(self, value: str) -> None:
+        self._solution_path = value
+
+    def get_solution_name(self) -> str:
         """
 
+        :return:
+        """
+
+        iterations = round(max([len(body.data) for body in self._bodies]))
+        et = max([max(body.data.time) for body in self._bodies])
+
+        return f"{len(self._bodies)}n_{round(iterations/1e3)}e3iter_{round(et)}et_{str(time.strftime('%d-%m-%y_%H-%M-%S'))}"
+
+    def save_solution(self, path: str = None) -> None:
+        """
+
+        :param path:
+        :return:
+        """
+
+        if path is None:
+            path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "solutions", self._name)
+            os.mkdir(path)
+
+        for n, body in enumerate(self._bodies):
+            body_path = os.path.join(path, f"n_{n}")
+            if not os.path.isdir(body_path):
+                os.mkdir(body_path)
+
+            body.data.to_csv(os.path.join(body_path, f"n_{n}_data.csv"), index=False)
+
+        self._solution_path = path
+
+    def save_plot(self, fig, plot_name: str) -> None:
+        """
+
+        :param plot_name:
         :param fig:
         :return:
         """
 
-        pass
+        if self._solution_path is None:
+            self.save_solution()
+
+        plot_path = os.path.join(self._solution_path, "Plots")
+        if not os.path.isdir(plot_path):
+            os.mkdir(plot_path)
+
+        # plt.figure(fig.number)
+
+        plt.savefig(os.path.join(plot_path, f"{plot_name}.png"))
 
     def plot_trajectory(self, n_filter: list[int] = None, iter_range: list = None, fig: plt.Figure = None,
                         show: bool = True, save: bool = True) -> plt.Figure:
@@ -58,7 +108,7 @@ class Results:
             n_filter = range(len(self._bodies))
 
         if fig is None:
-            fig = plt.Figure(figsize=(10, 10))
+            fig = plt.figure(figsize=(10, 10))
             ax = plt.axes(projection="3d")
         else:
             ax = fig.axes[0]
@@ -79,31 +129,13 @@ class Results:
         ax.set_zlabel("z [Km]")
         plt.legend()
 
+        if save:
+            self.save_plot(fig=fig, plot_name=f"Trajectory_{len(n_filter)}n_{iter_range}iter_rng")
+
         if show:
             plt.show()
 
-        if save:
-            self.save_plot(fig=fig)
-
         return fig
-
-    def save_solution(self, path: str = None) -> None:
-        """
-
-        :param path:
-        :return:
-        """
-
-        if path is None:
-            path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "solutions", self._name)
-            os.mkdir(path)
-
-        for n, body in enumerate(self._bodies):
-            body_path = os.path.join(path, f"n_{n}")
-            if not os.path.isdir(body_path):
-                os.mkdir(body_path)
-
-            body.data.to_csv(os.path.join(body_path, f"n_{n}_data.csv"), index=False)
 
     def animate_solution(self, frames: int = 20, n_filter: list[int] = None, show: bool = True) -> None:
         """
@@ -176,7 +208,7 @@ class Results:
             n_filter = range(len(self._bodies))
 
         if fig is None:
-            fig = plt.Figure(figsize=(10, 10))
+            fig = plt.figure(figsize=(10, 10))
 
         for n in n_filter:
             v_data = np.array([self._bodies[n].data.v_x.iloc[iter_range[0]:iter_range[1]],
@@ -190,8 +222,8 @@ class Results:
         plt.legend()
         plt.grid()
 
+        if save:
+            self.save_plot(fig=fig, plot_name=f"Velocity_Mag_{len(n_filter)}n_{iter_range}iter_rng")
+
         if show:
             plt.show()
-
-        if save:
-            self.save_plot(fig=fig)
