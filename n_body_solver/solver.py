@@ -13,6 +13,9 @@ class Solver:
         """
 
         :param bodies:
+        :param iterations:
+        :param dt:
+        :param debug:
         """
 
         self._debug: bool = debug
@@ -57,8 +60,7 @@ class Solver:
         for n, body in enumerate(self._bodies):
             if n != n_target:
                 x_rel = body.x - self._bodies[n_target].x
-                x_rel_mag = np.linalg.norm(x_rel, ord=1)
-                F_g += (self._G * self._bodies[n_target].m * self._bodies[n].m * x_rel) / (x_rel_mag ** 3)
+                F_g += (self._G * self._bodies[n_target].m * self._bodies[n].m * x_rel) / (np.linalg.norm(x_rel, ord=1) ** 3)
 
         return F_g
 
