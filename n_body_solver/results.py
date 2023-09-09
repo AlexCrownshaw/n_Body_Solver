@@ -156,3 +156,42 @@ class Results:
                 ax.set_3d_properties([self._bodies[n].data.z.iloc[iter_step * num]])
 
         return frame_data
+
+    def plot_velocity(self, n_filter: list[int] = None, iter_range: list = None, fig: plt.Figure = None,
+                      show: bool = True, save: bool = True) -> plt.Figure:
+        """
+
+        :param n_filter:
+        :param iter_range:
+        :param fig:
+        :param show:
+        :param save:
+        :return:
+        """
+
+        if iter_range is None:
+            iter_range = [0, max([len(body.data) for body in self._bodies])]
+
+        if n_filter is None:
+            n_filter = range(len(self._bodies))
+
+        if fig is None:
+            fig = plt.Figure(figsize=(10, 10))
+
+        for n in n_filter:
+            v_data = np.array([self._bodies[n].data.v_x.iloc[iter_range[0]:iter_range[1]],
+                               self._bodies[n].data.v_y.iloc[iter_range[0]:iter_range[1]],
+                               self._bodies[n].data.v_z.iloc[iter_range[0]:iter_range[1]]])
+            v_mag = [np.linalg.norm(v_data[:, i]) for i in range(v_data.shape[1])]
+            plt.plot(self._bodies[n].data.time.iloc[iter_range[0]:iter_range[1]], v_mag, label=f"n: {n}")
+
+        plt.xlabel("Time [s]")
+        plt.ylabel("Velocity Magnitude [m/s]")
+        plt.legend()
+        plt.grid()
+
+        if show:
+            plt.show()
+
+        if save:
+            self.save_plot(fig=fig)
