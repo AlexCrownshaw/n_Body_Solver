@@ -1,7 +1,7 @@
 ##Usage examples
 
 ```python
-iimport numpy as np
+import numpy as np
 
 from n_body_solver.solver import Solver
 from n_body_solver.body import Body
@@ -52,6 +52,8 @@ def three_four_five():
     results = solver.solve()
     results.plot_trajectory()
     results.animate_solution(frames=100)
+    results.plot_velocity()
+
 
 
 if __name__ == "__main__":
