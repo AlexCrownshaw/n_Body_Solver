@@ -1,0 +1,11 @@
+setup.py
+n_body_solver/__init__.py
+n_body_solver/body.py
+n_body_solver/results.py
+n_body_solver/rk4.py
+n_body_solver/solver.py
+n_body_solver.egg-info/PKG-INFO
+n_body_solver.egg-info/SOURCES.txt
+n_body_solver.egg-info/dependency_links.txt
+n_body_solver.egg-info/requires.txt
+n_body_solver.egg-info/top_level.txt
