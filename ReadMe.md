@@ -6,10 +6,14 @@ Latest release version 0.1:
 ```commandline
 pip install git+https://github.com/AlexCrownshaw/n_Body_Solver.git@master
 ```
+### Install requirements (Only required when cloning)
+```commandline
+pip install -r requirements.txt
+```
 ## Usage examples
 
-### Three Body (3-4-5 example)
-
+### Three Body Example
+Using Astronomical Units and Solar Masses
 ```python
 from n_body_solver.solver import Solver
 from n_body_solver.body import Body
@@ -21,24 +25,24 @@ DT = 5
 MASS_345 = 1e20
 """ PARAMETERS STOP """
 
-def three_four_five():
-    n1 = Body(m=MASS_345, x=[300e3, 0, 0])
-    n2 = Body(m=MASS_345, x=[0, 400e3, 0])
-    n3 = Body(m=MASS_345, x=[0, 0, 0])
+def three_body():
+    n1 = Body(m=138.3, x=[-16, 21, 0], m_unit="sm", x_unit="au")
+    n2 = Body(m=46.1, x=[22, -17, 0], m_unit="sm", x_unit="au")
+    n3 = Body(m=29.2, x=[-2, -10, 0], m_unit="sm", x_unit="au")
 
     solver = Solver(bodies=[n1, n2, n3], iterations=ITERATIONS, dt=DT)
     results = solver.solve()
-    results.plot_trajectory()
+    results.save_solution()
+    results.plot_trajectory(save=True)
     results.animate_solution(frames=100)
     results.plot_velocity()
 
 
-
 if __name__ == "__main__":
-    three_four_five()
+    three_body()()
 
 ```
-![alt text](https://github.com/AlexCrownshaw/n_Body_Solver/blob/master/n_body_solver/solutions/3n_32e3iter_127996et_10-09-23_16-05-39/Plots/Solution_Animation_3n.gif "Logo Title Text 1")
+![alt text](https://github.com/AlexCrownshaw/n_Body_Solver/blob/master/n_body_solver/solutions/3n_30e3iter_946168460et_10-09-23_22-34-45/Plots/Solution_Animation_3n.gif "Logo Title Text 1")
 ### Orbit
 
 ```python
