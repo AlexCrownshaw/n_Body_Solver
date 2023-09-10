@@ -4,7 +4,8 @@ import pandas as pd
 
 class Body:
 
-    _MASS_UNITS = {"kg": 1}
+    _MASS_UNITS = {"kg": 1,
+                   "sm": 1.988e30}
     _DISP_UNITS = {"m": 1,
                    "au": 1.496e+11}
 
