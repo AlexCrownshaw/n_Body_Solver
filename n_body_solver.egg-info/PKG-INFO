@@ -1,7 +1,0 @@
-Metadata-Version: 2.1
-Name: n-body-solver
-Version: 0.1.0
-Summary: A DNS n body solver using newtons law of gravity
-Home-page: https://github.com/AlexCrownshaw/n_Body_Solver
-Author: Alex Crownshaw
-Author-email: alex.crownshaw12@gmail.com
