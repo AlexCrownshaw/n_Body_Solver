@@ -1,7 +1,11 @@
 # n_Body_Solver
 This projects uses a direct numerical simulation approach to the infamous n body problem. 
 A 4th order Runge-Kutta numerical integration method is used for accurate and low computation analysis. 
-
+## Installation
+Latest release version 0.1:
+```commandline
+pip install git+https://github.com/AlexCrownshaw/n_Body_Solver.git@master
+```
 ## Usage examples
 
 ### Three Body (3-4-5 example)
