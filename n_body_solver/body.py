@@ -9,7 +9,8 @@ class Body:
     _DISP_UNITS = {"m": 1,
                    "au": 1.496e+11}
 
-    def __init__(self, m: float, x: list, v: list = None, a: list = None, m_unit: str = "kg", x_unit: str = "m"):
+    def __init__(self, m: float, x: list, v: list = None, a: list = None, m_unit: str = "kg", x_unit: str = "m",
+                 data: pd.DataFrame = None):
         """
 
         :param m:
@@ -18,6 +19,7 @@ class Body:
         :param a:
         :param m_unit:
         :param x_unit:
+        :param data:
         """
 
         """ Unit declarations """
@@ -52,11 +54,18 @@ class Body:
         self._state_vec = np.array([self._x, self._v, self._a])
 
         """ Data frame declaration """
-        self._data = pd.DataFrame(columns=["iteration", "time",
-                                           "x", "y", "z",
-                                           "v_x", "v_y", "v_z",
-                                           "a_x", "a_y", "a_z",
-                                           "F_x", "F_y", "F_z"])
+        if data is not None:
+            self._data = data
+        else:
+            self._data = pd.DataFrame(columns=["iteration", "time",
+                                               "x", "y", "z",
+                                               "v_x", "v_y", "v_z",
+                                               "a_x", "a_y", "a_z",
+                                               "F_x", "F_y", "F_z"])
+
+        """ Store Initial Conditions """
+        self._x_ic: np.array = self._x
+        self._v_ic: np.array = self._v
 
     @property
     def m(self) -> float:
@@ -113,6 +122,14 @@ class Body:
     @property
     def x_unit(self) -> str:
         return self._x_unit
+
+    @property
+    def x_ic(self) -> np.array:
+        return self._x_ic
+
+    @property
+    def v_ic(self) -> np.array:
+        return self._v_ic
 
     def store_state(self, i: int, t: float) -> None:
         """
