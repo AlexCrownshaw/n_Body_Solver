@@ -4,33 +4,53 @@ import pandas as pd
 
 class Body:
 
-    def __init__(self, m: float, x: list, v: list = None, a: list = None):
+    _MASS_UNITS = {"kg": 1}
+    _DISP_UNITS = {"m": 1,
+                   "au": 1.496e+11}
+
+    def __init__(self, m: float, x: list, v: list = None, a: list = None, m_unit: str = "kg", x_unit: str = "m"):
         """
 
         :param m:
         :param x:
+        :param v:
+        :param a:
+        :param m_unit:
+        :param x_unit:
         """
 
+        """ Unit declarations """
+        if m_unit in self._MASS_UNITS.keys():
+            self._m_unit: str = m_unit
+        else:
+            raise Exception(f"ERROR: Invalid mass unit. Choose from {self._MASS_UNITS.keys()}")
+
+        if x_unit in self._DISP_UNITS.keys():
+            self._x_unit: str = x_unit
+        else:
+            raise Exception(f"ERROR: Invalid displacement unit. Choose from {self._DISP_UNITS.keys()}")
+
         """ Scalar declarations """
-        self._m: float = m
+        self._m: float = self.convert_to_kg(mass=m, unit=self._m_unit)
 
         """ Cartesian vector declarations """
         self._F_g: np.array = np.zeros(3)
-        self._x: np.array = np.array(x)
+        self._x: np.array = self.convert_to_meters(vec=np.array(x), unit=self.x_unit)
 
         if v is None:
             self._v = np.zeros(3)
         else:
-            self._v = np.array(v)
+            self._v = self.convert_to_meters(vec=np.array(v), unit=self.x_unit)
 
         if a is None:
             self._a = np.zeros(3)
         else:
-            self._a = np.array(a)
+            self._a = self.convert_to_meters(vec=np.array(a), unit=self.x_unit)
 
         """ State vector declaration """
         self._state_vec = np.array([self._x, self._v, self._a])
 
+        """ Data frame declaration """
         self._data = pd.DataFrame(columns=["iteration", "time",
                                            "x", "y", "z",
                                            "v_x", "v_y", "v_z",
@@ -85,6 +105,14 @@ class Body:
     def data(self) -> pd.DataFrame:
         return self._data
 
+    @property
+    def m_unit(self) -> str:
+        return self._m_unit
+
+    @property
+    def x_unit(self) -> str:
+        return self._x_unit
+
     def store_state(self, i: int, t: float) -> None:
         """
 
@@ -96,3 +124,23 @@ class Body:
                                            self._v[0], self._v[1], self._v[2],
                                            self._a[0], self._a[1], self._a[2],
                                            self._F_g[0], self._F_g[1], self._F_g[2]]
+
+    def convert_to_kg(self, mass: float, unit: str) -> float:
+        """
+
+        :param mass:
+        :param unit:
+        :return:
+        """
+
+        return mass * self._MASS_UNITS[unit]
+
+    def convert_to_meters(self, vec: np.array, unit: str) -> np.array:
+        """
+
+        :param vec:
+        :param unit:
+        :return:
+        """
+
+        return vec * self._DISP_UNITS[unit]
