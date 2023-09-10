@@ -3,7 +3,6 @@ import time
 
 import numpy as np
 import matplotlib.pyplot as plt
-import mpl_toolkits.mplot3d.axes3d as p3
 import matplotlib.animation as animation
 
 
@@ -48,7 +47,7 @@ class Results:
         iterations = round(max([len(body.data) for body in self._bodies]))
         et = max([max(body.data.time) for body in self._bodies])
 
-        return f"{len(self._bodies)}n_{round(iterations/1e3)}e3iter_{round(et)}et_{str(time.strftime('%d-%m-%y_%H-%M-%S'))}"
+        return f"{len(self._bodies)}n_{round(iterations / 1e3)}e3iter_{round(et)}et_{str(time.strftime('%d-%m-%y_%H-%M-%S'))}"
 
     def save_solution(self, path: str = None) -> None:
         """
@@ -84,8 +83,6 @@ class Results:
         plot_path = os.path.join(self._solution_path, "Plots")
         if not os.path.isdir(plot_path):
             os.mkdir(plot_path)
-
-        # plt.figure(fig.number)
 
         plt.savefig(os.path.join(plot_path, f"{plot_name}.png"))
 
@@ -137,12 +134,13 @@ class Results:
 
         return fig
 
-    def animate_solution(self, frames: int = 20, n_filter: list[int] = None, show: bool = True) -> None:
+    def animate_solution(self, frames: int = 20, n_filter: list[int] = None, show: bool = True, save: bool = True) -> None:
         """
 
         :param frames:
         :param n_filter:
         :param show:
+        :param save:
         :return:
         """
 
@@ -152,15 +150,34 @@ class Results:
         iter_step = round(max([len(body.data) for body in self._bodies]) / frames)
 
         fig = plt.figure()
-        ax = p3.Axes3D(fig)
+        ax = fig.add_subplot(projection="3d")
 
-        frame_data = [ax.plot(self._bodies[n].data.x.iloc[0],
-                              self._bodies[n].data.x.iloc[0],
-                              self._bodies[n].data.x.iloc[0])[0]
+        frame_data = [ax.plot(self._bodies[n].data.x.iloc[0: iter_step],
+                              self._bodies[n].data.y.iloc[0: iter_step],
+                              self._bodies[n].data.z.iloc[0: iter_step])[0]
                       for n in range(len(self._bodies)) if n in n_filter]
 
-        _ = animation.FuncAnimation(fig=fig, func=self._update_frame_data, frames=frames,
-                                    fargs=(frame_data, int(iter_step), n_filter), interval=50, blit=False)
+        max_disp = min_disp = float(0)
+        for body in self._bodies:
+            max_disp_body = max([max(body.data[dim]) for dim in ["x", "y", "z"]])
+            if max_disp_body > max_disp:
+                max_disp = max_disp_body
+
+            min_disp_body = min([min(body.data[dim]) for dim in ["x", "y", "z"]])
+            if min_disp_body > min_disp:
+                min_disp = min_disp_body
+        
+        ax.set(xlabel='X')
+        ax.set(ylabel='Y')
+        ax.set(zlabel='Z')
+
+        anim = animation.FuncAnimation(fig=fig, func=self._update_frame_data, frames=frames,
+                                       fargs=(frame_data, int(iter_step), n_filter), interval=50)
+
+        if save:
+            writer_gif = animation.PillowWriter(fps=30)
+            file_path = os.path.join(self._solution_path, "Plots", f"Solution_Animation_{len(n_filter)}n.gif")
+            anim.save(filename=file_path, writer=writer_gif)
 
         if show:
             plt.show()
@@ -179,13 +196,12 @@ class Results:
         if n_filter is None:
             n_filter = range(len(self._bodies))
 
-        # iter_range = [iter_step * num, (iter_step * num) + iter_step]
+        iter_index = num * iter_step
 
         for n, ax in enumerate(frame_data):
             if n in n_filter:
-                ax.set_data([self._bodies[n].data.x.iloc[iter_step * num],
-                             self._bodies[n].data.y.iloc[iter_step * num]])
-                ax.set_3d_properties([self._bodies[n].data.z.iloc[iter_step * num]])
+                ax.set_data(np.array([self._bodies[n].data.x.iloc[:iter_index], self._bodies[n].data.y.iloc[:iter_index]]))
+                ax.set_3d_properties(zs=self._bodies[n].data.z.iloc[:iter_index])
 
         return frame_data
 
@@ -227,3 +243,5 @@ class Results:
 
         if show:
             plt.show()
+
+        return fig
