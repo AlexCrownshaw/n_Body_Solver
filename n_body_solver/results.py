@@ -1,22 +1,32 @@
 import os
 import time
+import json
 
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+import pandas as pd
+
+from n_body_solver.body import Body
 
 
 class Results:
 
-    def __init__(self, bodies: list[np.array]):
+    def __init__(self, bodies: list[np.array] = None, solution_path: str = None):
         """
 
         :param bodies:
+        :param solution_path:
         """
 
-        self._bodies: list[np.array] = bodies
-        self._name: str = self.get_solution_name()
-        self._solution_path: str = ""
+        if bodies is not None:
+            self._bodies: list[np.array] = bodies
+            self._solution_path: str = ""
+            self._name: str = self.get_solution_name()
+        elif solution_path is not None:
+            self._bodies: list[np.array] = self.load_solution(solution_path=solution_path)
+        else:
+            raise Exception("ERROR: Results object created without valid bodies list or solution path")
 
     @property
     def bodies(self) -> list[np.array]:
@@ -60,14 +70,42 @@ class Results:
             path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "solutions", self._name)
             os.mkdir(path)
 
+        body_params = []
+
         for n, body in enumerate(self._bodies):
+            body_params.append({"n": n, "mass": body.m, "x_ic": list(body.x_ic), "v_ic": list(body.v_ic)})
             body_path = os.path.join(path, f"n_{n}")
             if not os.path.isdir(body_path):
                 os.mkdir(body_path)
 
             body.data.to_csv(os.path.join(body_path, f"n_{n}_data.csv"), index=False)
 
+        iterations = max([len(body.data) for body in self._bodies])
+        elapsed_time = max([body.data.time.iloc[-1] for body in self._bodies])
+
+        sim_params = {"iter": iterations,
+                      "et": elapsed_time,
+                      "dt": elapsed_time / iterations,
+                      "bodies": body_params}
+
+        with open(os.path.join(path, "Sim_Parameters.json"), "w") as json_file:
+            json.dump(sim_params, json_file)
+
         self._solution_path = path
+
+    def load_solution(self, solution_path: str) -> list:
+        """
+
+        :param solution_path:
+        :return:
+        """
+
+        body_dir_names = [dir_name for dir_name in os.listdir(solution_path) if "n_" in dir_name]
+        bodies = [None] * len(body_dir_names)
+        for body_dir_name in body_dir_names:
+            n = int(body_dir_name.replace("n_", ""))
+            body_data = pd.read_csv(os.path.join(solution_path, body_dir_name, f"n_{n}_data.csv"))
+            bodies[n] = Body(data=body_data)
 
     def save_plot(self, fig, plot_name: str) -> None:
         """
@@ -134,7 +172,8 @@ class Results:
 
         return fig
 
-    def animate_solution(self, frames: int = 20, n_filter: list[int] = None, show: bool = True, save: bool = True) -> None:
+    def animate_solution(self, frames: int = 20, n_filter: list[int] = None, show: bool = True,
+                         save: bool = True) -> None:
         """
 
         :param frames:
@@ -166,7 +205,7 @@ class Results:
             min_disp_body = min([min(body.data[dim]) for dim in ["x", "y", "z"]])
             if min_disp_body > min_disp:
                 min_disp = min_disp_body
-        
+
         ax.set(xlabel='X')
         ax.set(ylabel='Y')
         ax.set(zlabel='Z')
@@ -198,10 +237,29 @@ class Results:
 
         iter_index = num * iter_step
 
-        for n, ax in enumerate(frame_data):
+        xlim = np.zeros((2, len(n_filter)))
+        ylim = np.zeros((2, len(n_filter)))
+        zlim = np.zeros((2, len(n_filter)))
+
+        for n, line in enumerate(frame_data):
             if n in n_filter:
-                ax.set_data(np.array([self._bodies[n].data.x.iloc[:iter_index], self._bodies[n].data.y.iloc[:iter_index]]))
-                ax.set_3d_properties(zs=self._bodies[n].data.z.iloc[:iter_index])
+                x_data = self._bodies[n].data.x.iloc[:iter_index]
+                y_data = self._bodies[n].data.y.iloc[:iter_index]
+                z_data = self._bodies[n].data.z.iloc[:iter_index]
+
+                line.set_data(np.array([x_data, y_data]))
+                line.set_3d_properties(zs=z_data)
+
+                if num != 0:
+                    xlim[:, n] = [max(x_data), min(x_data)]
+                    ylim[:, n] = [max(y_data), min(y_data)]
+                    zlim[:, n] = [max(z_data), min(z_data)]
+
+        if num != 0:
+            for line in frame_data:
+                line.axes.set(xlim3d=(min(xlim[1, :]), max(xlim[0, :])),
+                              ylim3d=(min(ylim[1, :]), max(ylim[0, :])),
+                              zlim3d=(-1, 1))
 
         return frame_data
 
