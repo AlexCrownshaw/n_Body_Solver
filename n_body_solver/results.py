@@ -12,6 +12,10 @@ from n_body_solver.body import Body
 
 class Results:
 
+    _SM = 1.988e30  # Solar mass in Kg
+    _AU = 1.496e+11 # Astronomical unit in meters
+    _YEAR = 3.154e+7  # Year in seconds
+
     def __init__(self, bodies: list[np.array] = None, solution_path: str = None):
         """
 
@@ -23,8 +27,9 @@ class Results:
             self._bodies: list[np.array] = bodies
             self._solution_path: str = ""
             self._name: str = self.get_solution_name()
+            self._solver_params: dict = self.get_solver_params()
         elif solution_path is not None:
-            self._bodies: list[np.array] = self.load_solution(solution_path=solution_path)
+            self.load_solution(solution_path=solution_path)
         else:
             raise Exception("ERROR: Results object created without valid bodies list or solution path")
 
@@ -59,6 +64,21 @@ class Results:
 
         return f"{len(self._bodies)}n_{round(iterations / 1e3)}e3iter_{round(et)}et_{str(time.strftime('%d-%m-%y_%H-%M-%S'))}"
 
+    def get_solver_params(self) -> dict:
+        """
+
+        :return:
+        """
+
+        body_params = [None] * len(self._bodies)
+        for n, body in enumerate(self._bodies):
+            body_params[n] = {"n": n, "mass": body.m, "x_ic": list(body.x_ic), "v_ic": list(body.v_ic)}
+
+        return {"iter": round(max([len(body.data) for body in self._bodies])),
+                "et": max([max(body.data.time) for body in self._bodies]),
+                "dt": round(self._bodies[0].data.time.iloc[1] - self._bodies[0].data.time.iloc[0], 3),
+                "bodies": body_params}
+
     def save_solution(self, path: str = None) -> None:
         """
 
@@ -70,30 +90,19 @@ class Results:
             path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "solutions", self._name)
             os.mkdir(path)
 
-        body_params = []
-
         for n, body in enumerate(self._bodies):
-            body_params.append({"n": n, "mass": body.m, "x_ic": list(body.x_ic), "v_ic": list(body.v_ic)})
             body_path = os.path.join(path, f"n_{n}")
             if not os.path.isdir(body_path):
                 os.mkdir(body_path)
-
             body.data.to_csv(os.path.join(body_path, f"n_{n}_data.csv"), index=False)
 
-        iterations = max([len(body.data) for body in self._bodies])
-        elapsed_time = max([body.data.time.iloc[-1] for body in self._bodies])
-
-        sim_params = {"iter": iterations,
-                      "et": elapsed_time,
-                      "dt": elapsed_time / iterations,
-                      "bodies": body_params}
-
-        with open(os.path.join(path, "Sim_Parameters.json"), "w") as json_file:
-            json.dump(sim_params, json_file)
+        solver_params = self.get_solver_params()
+        with open(os.path.join(path, "Solver_Parameters.json"), "w") as json_file:
+            json.dump(solver_params, json_file)
 
         self._solution_path = path
 
-    def load_solution(self, solution_path: str) -> list:
+    def load_solution(self, solution_path: str) -> None:
         """
 
         :param solution_path:
@@ -101,11 +110,33 @@ class Results:
         """
 
         body_dir_names = [dir_name for dir_name in os.listdir(solution_path) if "n_" in dir_name]
+
+        with open(os.path.join(solution_path, "Solver_Parameters.json"), "r") as json_file:
+            self._solver_params = json.load(json_file)
+            body_params = self._solver_params["bodies"]
+
         bodies = [None] * len(body_dir_names)
         for body_dir_name in body_dir_names:
             n = int(body_dir_name.replace("n_", ""))
             body_data = pd.read_csv(os.path.join(solution_path, body_dir_name, f"n_{n}_data.csv"))
-            bodies[n] = Body(data=body_data)
+            x_ic = [body_data.x.iloc[0], body_data.y.iloc[0], body_data.z.iloc[0]]
+            v_ic = [body_data.v_x.iloc[0], body_data.v_y.iloc[0], body_data.v_z.iloc[0]]
+            bodies[n] = Body(m=body_params[n]["mass"], x=x_ic, v=v_ic, data=body_data)
+
+        self._bodies = bodies
+        self._solution_path = solution_path
+        self._name = os.path.basename(solution_path)
+        self._solver_params = self.get_solver_params()
+
+    def recover_solver(self):
+        """
+
+        :return:
+        """
+
+        from n_body_solver.solver import Solver
+
+        return Solver(bodies=self._bodies, iterations=self._solver_params["iter"], dt=self._solver_params["dt"])
 
     def save_plot(self, fig, plot_name: str) -> None:
         """
@@ -188,33 +219,41 @@ class Results:
 
         iter_step = round(max([len(body.data) for body in self._bodies]) / frames)
 
-        fig = plt.figure()
-        ax = fig.add_subplot(projection="3d")
+        fig = plt.figure(figsize=(10, 10))
+        ax = fig.add_subplot(111, projection="3d")
 
         frame_data = [ax.plot(self._bodies[n].data.x.iloc[0: iter_step],
                               self._bodies[n].data.y.iloc[0: iter_step],
-                              self._bodies[n].data.z.iloc[0: iter_step])[0]
+                              self._bodies[n].data.z.iloc[0: iter_step],
+                              markevery=[-1], marker="o",
+                              label=f"n{n}_{round(self._bodies[n].m / self._SM)}[SM]")[0]
                       for n in range(len(self._bodies)) if n in n_filter]
 
-        max_disp = min_disp = float(0)
-        for body in self._bodies:
-            max_disp_body = max([max(body.data[dim]) for dim in ["x", "y", "z"]])
-            if max_disp_body > max_disp:
-                max_disp = max_disp_body
+        # max_disp = min_disp = float(0)
+        # for body in self._bodies:
+        #     max_disp_body = max([max(body.data[dim]) for dim in ["x", "y", "z"]])
+        #     if max_disp_body > max_disp:
+        #         max_disp = max_disp_body
+        #
+        #     min_disp_body = min([min(body.data[dim]) for dim in ["x", "y", "z"]])
+        #     if min_disp_body > min_disp:
 
-            min_disp_body = min([min(body.data[dim]) for dim in ["x", "y", "z"]])
-            if min_disp_body > min_disp:
-                min_disp = min_disp_body
+        ax.set(xlabel=f"X_[{'Km'}]")
+        ax.set(ylabel=f"Y_[{'Km'}]")
+        ax.set(zlabel=f"Z_[{'Km'}]")
+        plt.legend()
 
-        ax.set(xlabel='X')
-        ax.set(ylabel='Y')
-        ax.set(zlabel='Z')
+        title = ""
+        for part in [f"m{n}: {body.m/self._SM} [SM] --- x{n}_init: {body.x_ic/self._AU} [AU] --- v{n}_init: {body.v_ic/self._AU * self._YEAR} [AU/Year]"
+                     for n, body in enumerate(self._bodies) if n in n_filter]:
+            title = f"{title}\n{part}"
+        plt.title(title)
 
         anim = animation.FuncAnimation(fig=fig, func=self._update_frame_data, frames=frames,
-                                       fargs=(frame_data, int(iter_step), n_filter), interval=50)
+                                       fargs=(frame_data, int(iter_step), n_filter), interval=50, blit=False)
 
         if save:
-            writer_gif = animation.PillowWriter(fps=30)
+            writer_gif = animation.PillowWriter(fps=60)
             file_path = os.path.join(self._solution_path, "Plots", f"Solution_Animation_{len(n_filter)}n.gif")
             anim.save(filename=file_path, writer=writer_gif)
 
@@ -235,7 +274,7 @@ class Results:
         if n_filter is None:
             n_filter = range(len(self._bodies))
 
-        iter_index = num * iter_step
+        iter_index: int = num * iter_step
 
         xlim = np.zeros((2, len(n_filter)))
         ylim = np.zeros((2, len(n_filter)))

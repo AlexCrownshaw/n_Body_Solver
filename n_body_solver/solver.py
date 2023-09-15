@@ -24,6 +24,7 @@ class Solver:
 
         self._iterations: float = iterations
         self._dt: float = dt
+        self._t: float = 0
 
     @property
     def bodies(self) -> list[Body]:
@@ -36,6 +37,10 @@ class Solver:
     @property
     def dt(self) -> float:
         return self._dt
+
+    @property
+    def t(self) -> float:
+        return self._t
 
     def config_solver(self, iterations: float, dt: float) -> None:
         """
@@ -118,17 +123,17 @@ class Solver:
         """
 
         for i in np.arange(self._iterations):
-            t = i * self._dt
+            self._t = i * self._dt
 
             if i == 0:
                 state_vec = np.array([self._get_state_vector(n=n) for n in range(len(self._bodies))])
             else:
                 state_vec = self._compute_iteration()
 
-            self._update_bodies(state_vec=state_vec, i=i, t=t)
+            self._update_bodies(state_vec=state_vec, i=i, t=self._t)
 
             if self._debug:
-                print(f"\nInstance: {i}, Time: {t} s")
+                print(f"\nInstance: {i}, Time: {self._t} s")
                 for n, body in enumerate(self._bodies):
                     print(f"""n: {n}
                     \tx: {np.round(body.x)}
