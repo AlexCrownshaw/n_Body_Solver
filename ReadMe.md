@@ -1,5 +1,5 @@
 # n_Body_Solver
-This projects uses a direct numerical simulation approach to the infamous n body problem. 
+The n_Body_Solver uses a direct numerical simulation approach to solve the infamous n body problem. 
 A 4th order Runge-Kutta numerical integration method is used for accurate and low computation analysis. 
 ## Installation
 Latest release version 0.1:
