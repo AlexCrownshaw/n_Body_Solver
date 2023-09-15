@@ -6,6 +6,10 @@ Latest release version 0.1:
 ```commandline
 pip install git+https://github.com/AlexCrownshaw/n_Body_Solver.git@master
 ```
+## Clone
+```commandLine
+git clone https://github.com/AlexCrownshaw/n_Body_Solver.git
+```
 ### Install requirements (Only required when cloning)
 ```commandline
 pip install -r requirements.txt
