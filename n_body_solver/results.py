@@ -72,7 +72,7 @@ class Results:
 
         body_params = [None] * len(self._bodies)
         for n, body in enumerate(self._bodies):
-            body_params[n] = {"n": n, "mass": body.m, "x_ic": list(body.x_ic), "v_ic": list(body.v_ic)}
+            body_params[n] = {"n": n, "mass": body.m, "x_ic": [float(body.x_ic[i]) for i in range(3)], "v_ic": [float(body.v_ic[i]) for i in range(3)]}
 
         return {"iter": round(max([len(body.data) for body in self._bodies])),
                 "et": max([max(body.data.time) for body in self._bodies]),
