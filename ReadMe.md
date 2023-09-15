@@ -19,8 +19,8 @@ pip install -r requirements.txt
 ### Three Body Example
 Using Astronomical Units and Solar Masses
 ```python
-from n_body_solver.solver import Solver
-from n_body_solver.body import Body
+from n_body_solver import Solver
+from n_body_solver import Body
 
 """ PARAMETERS START """
 ITERATIONS = 40000
@@ -51,8 +51,8 @@ if __name__ == "__main__":
 ```python
 import numpy as np
 
-from n_body_solver.solver import Solver
-from n_body_solver.body import Body
+from n_body_solver import Solver
+from n_body_solver import Body
 
 """ PARAMETERS START """
 ITERATIONS = 32000
@@ -91,7 +91,7 @@ if __name__ == "__main__":
 ### Loading Solutions
 
 ```python
-from n_body_solver.results import Results
+from n_body_solver import Results
 
 def main():
     # Load and plot solution
