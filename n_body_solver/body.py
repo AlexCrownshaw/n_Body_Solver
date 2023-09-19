@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 
+from n_body_solver.constants import Constants
+
 
 class Body:
 
@@ -143,7 +145,8 @@ class Body:
                                            self._a[0], self._a[1], self._a[2],
                                            self._F_g[0], self._F_g[1], self._F_g[2]]
 
-    def convert_to_kg(self, mass: float, unit: str) -> float:
+    @staticmethod
+    def convert_to_kg(mass: float, unit: str) -> float:
         """
 
         :param mass:
@@ -151,9 +154,10 @@ class Body:
         :return:
         """
 
-        return mass * self._MASS_UNITS[unit]
+        return mass * Constants.MASS_UNITS[unit]
 
-    def convert_to_meters(self, vec: np.array, unit: str) -> np.array:
+    @staticmethod
+    def convert_to_meters(vec: np.array, unit: str) -> np.array:
         """
 
         :param vec:
@@ -161,4 +165,4 @@ class Body:
         :return:
         """
 
-        return vec * self._DISP_UNITS[unit]
+        return vec * Constants.DISP_UNITS[unit]

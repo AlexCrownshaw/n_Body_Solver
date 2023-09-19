@@ -1,13 +1,13 @@
 import numpy as np
 
 from n_body_solver.body import Body
+from n_body_solver.rbody import RBody
 from n_body_solver.rk4 import RK4
 from n_body_solver.results import Results
+from n_body_solver.constants import Constants
 
 
 class Solver:
-
-    _G: float = 6.67430e-11
 
     def __init__(self, bodies: list[Body], iterations: float = 100, dt: float = 1, debug=True):
         """
@@ -25,6 +25,10 @@ class Solver:
         self._iterations: float = iterations
         self._dt: float = dt
         self._t: float = 0
+
+        for body in self._bodies:
+            if type(body) is RBody:
+                body.dt = self._dt
 
     @property
     def bodies(self) -> list[Body]:
@@ -65,7 +69,7 @@ class Solver:
         for n, body in enumerate(self._bodies):
             if n != n_target:
                 x_rel = body.x - self._bodies[n_target].x
-                F_g += (self._G * self._bodies[n_target].m * self._bodies[n].m * x_rel) / (np.linalg.norm(x_rel, ord=1) ** 3)
+                F_g += (Constants.G * self._bodies[n_target].m * self._bodies[n].m * x_rel) / (np.linalg.norm(x_rel, ord=1) ** 3)
 
         return F_g
 
@@ -130,15 +134,19 @@ class Solver:
             else:
                 state_vec = self._compute_iteration()
 
+            for body in self._bodies:
+                if type(body) is RBody:
+                    body.compute_rotation()
+
             self._update_bodies(state_vec=state_vec, i=i, t=self._t)
 
             if self._debug:
                 print(f"\nInstance: {i}, Time: {self._t} s")
                 for n, body in enumerate(self._bodies):
                     print(f"""n: {n}
-                    \tx: {np.round(body.x)}
-                    \tv: {np.round(body.v)}
-                    \ta: {np.round(body.a)}
-                    \tF_g: {np.round(body.F_g)}""")
+                              \tx: {np.round(body.x)}
+                              \tv: {np.round(body.v)}
+                              \ta: {np.round(body.a)}
+                              \tF_g: {np.round(body.F_g)}""")
 
         return Results(bodies=self._bodies)
