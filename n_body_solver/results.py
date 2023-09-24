@@ -8,13 +8,10 @@ import matplotlib.animation as animation
 import pandas as pd
 
 from n_body_solver.body import Body
+from n_body_solver import Constants
 
 
 class Results:
-
-    _SM = 1.988e30  # Solar mass in Kg
-    _AU = 1.496e+11 # Astronomical unit in meters
-    _YEAR = 3.154e+7  # Year in seconds
 
     def __init__(self, bodies: list[np.array] = None, solution_path: str = None):
         """
@@ -226,7 +223,7 @@ class Results:
                               self._bodies[n].data.y.iloc[0: iter_step],
                               self._bodies[n].data.z.iloc[0: iter_step],
                               markevery=[-1], marker="o",
-                              label=f"n{n}_{round(self._bodies[n].m / self._SM)}[SM]")[0]
+                              label=f"n{n}_{round(self._bodies[n].m / Constants.MASS_UNITS['sm'])}[SM]")[0]
                       for n in range(len(self._bodies)) if n in n_filter]
 
         # max_disp = min_disp = float(0)
@@ -244,7 +241,7 @@ class Results:
         plt.legend()
 
         title = ""
-        for part in [f"m{n}: {body.m/self._SM} [SM] --- x{n}_init: {body.x_ic/self._AU} [AU] --- v{n}_init: {body.v_ic/self._AU * self._YEAR} [AU/Year]"
+        for part in [f"m{n}: {np.round(body.m/Constants.MASS_UNITS['sm'], 3)} [SM] --- x{n}_init: {np.round(body.x_ic/Constants.DISP_UNITS['au'], 3)} [AU] --- v{n}_init: {np.round(body.v_ic/Constants.VELOCITY_UNITS['kmps'], 3)} [Km/s]"
                      for n, body in enumerate(self._bodies) if n in n_filter]:
             title = f"{title}\n{part}"
         plt.title(title)

@@ -6,13 +6,8 @@ from n_body_solver.constants import Constants
 
 class Body:
 
-    _MASS_UNITS = {"kg": 1,
-                   "sm": 1.988e30}
-    _DISP_UNITS = {"m": 1,
-                   "au": 1.496e+11}
-
     def __init__(self, m: float, x: list, v: list = None, a: list = None, m_unit: str = "kg", x_unit: str = "m",
-                 data: pd.DataFrame = None):
+                 v_unit: str = "mps", data: pd.DataFrame = None):
         """
 
         :param m:
@@ -25,32 +20,37 @@ class Body:
         """
 
         """ Unit declarations """
-        if m_unit in self._MASS_UNITS.keys():
+        if m_unit in Constants.MASS_UNITS.keys():
             self._m_unit: str = m_unit
         else:
-            raise Exception(f"ERROR: Invalid mass unit. Choose from {self._MASS_UNITS.keys()}")
+            raise Exception(f"ERROR: Invalid mass unit. Choose from {Constants.MASS_UNITS.keys()}")
 
-        if x_unit in self._DISP_UNITS.keys():
+        if x_unit in Constants.DISP_UNITS.keys():
             self._x_unit: str = x_unit
         else:
-            raise Exception(f"ERROR: Invalid displacement unit. Choose from {self._DISP_UNITS.keys()}")
+            raise Exception(f"ERROR: Invalid displacement unit. Choose from {Constants.DISP_UNITS.keys()}")
+
+        if v_unit in Constants.VELOCITY_UNITS.keys():
+            self._v_unit: str = v_unit
+        else:
+            raise Exception(f"ERROR: Invalid velocity unit. Choose from {Constants.VELOCITY_UNITS.keys()}")
 
         """ Scalar declarations """
         self._m: float = self.convert_to_kg(mass=m, unit=self._m_unit)
 
         """ Cartesian vector declarations """
         self._F_g: np.array = np.zeros(3)
-        self._x: np.array = self.convert_to_meters(vec=np.array(x), unit=self.x_unit)
+        self._x: np.array = self.convert_to_meters(vec=np.array(x), unit=self._x_unit)
 
         if v is None:
             self._v = np.zeros(3)
         else:
-            self._v = self.convert_to_meters(vec=np.array(v), unit=self.x_unit)
+            self._v = self.convert_to_mps(vec=np.array(v), unit=self._v_unit)
 
         if a is None:
             self._a = np.zeros(3)
         else:
-            self._a = self.convert_to_meters(vec=np.array(a), unit=self.x_unit)
+            self._a = self.convert_to_meters(vec=np.array(a), unit=self._x_unit)
 
         """ State vector declaration """
         self._state_vec = np.array([self._x, self._v, self._a])
@@ -126,6 +126,10 @@ class Body:
         return self._x_unit
 
     @property
+    def v_unit(self) -> str:
+        return self._v_unit
+
+    @property
     def x_ic(self) -> np.array:
         return self._x_ic
 
@@ -166,3 +170,14 @@ class Body:
         """
 
         return vec * Constants.DISP_UNITS[unit]
+
+    @staticmethod
+    def convert_to_mps(vec: np.array, unit: str) -> np.array:
+        """
+
+        :param vec:
+        :param unit:
+        :return:
+        """
+
+        return vec * Constants.VELOCITY_UNITS[unit]
