@@ -25,7 +25,9 @@ from n_body_solver import Constants
 
 """ PARAMETERS START """
 ITERATIONS = 40000
-DT = Constants.TIME_UNITS["year"] * 4  # four thousandth of a year in seconds
+DT = Constants.TIME_UNITS["year"] / 1e3  # thousandth of a year in seconds
+
+RESULTS_PATH = r"C:\Dev\n_Body_Solver\n_body_solver\solutions"
 """ PARAMETERS STOP """
 
 
@@ -36,7 +38,7 @@ def main():
 
     solver = Solver(bodies=[n1, n2, n3], iterations=ITERATIONS, dt=DT)
     results = solver.solve()
-    results.save_solution()
+    results.save_solution(path=RESULTS_PATH)
     results.plot_trajectory(save=True)
     results.animate_solution(frames=100)
     results.plot_velocity()
@@ -45,7 +47,10 @@ def main():
 if __name__ == "__main__":
     main()
 ```
-![alt text](https://github.com/AlexCrownshaw/n_Body_Solver/blob/master/n_body_solver/solutions/3n_40e3iter_5046273840et_24-09-23_14-24-04/Plots/Solution_Animation_3n.gif "Three body Solution")
+
+![alt text](https://github.com/AlexCrownshaw/n_Body_Solver/blob/master/n_body_solver/solutions/3n_40e3iter_1261568460et_30-09-23_14-55-05/Plots/Solution_Animation_3n.gif "Three body Solution")
+![alt text](https://github.com/AlexCrownshaw/n_Body_Solver/blob/master/n_body_solver/solutions/3n_40e3iter_1261568460et_30-09-23_14-55-05/Plots/Velocity_Mag_3n_[0, 40000]iter_rng.png "Three body Solution")
+
 ### Orbit Example
 
 ```python
