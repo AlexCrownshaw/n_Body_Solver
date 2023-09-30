@@ -49,7 +49,7 @@ if __name__ == "__main__":
 ```
 
 ![alt text](https://github.com/AlexCrownshaw/n_Body_Solver/blob/master/n_body_solver/solutions/3n_40e3iter_1261568460et_30-09-23_14-55-05/Plots/Solution_Animation_3n.gif "Three body Solution")
-![alt text](https://github.com/AlexCrownshaw/n_Body_Solver/blob/master/n_body_solver/solutions/3n_40e3iter_1261568460et_30-09-23_14-55-05/Plots/Velocity_Mag_3n_[0, 40000]iter_rng.png "Three body Solution")
+![alt text](https://github.com/AlexCrownshaw/n_Body_Solver/blob/master/n_body_solver/solutions/3n_40e3iter_1261568460et_30-09-23_14-55-05/Plots/Velocity_Mag_3n_[0,40000]iter_rng.png "Three body Velocity")
 
 ### Orbit Example
 
