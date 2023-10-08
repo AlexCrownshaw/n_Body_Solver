@@ -1,3 +1,6 @@
+from typing import Union
+
+
 class Constants:
 
     _G: float = 6.67430e-11
@@ -21,20 +24,20 @@ class Constants:
 
     @classmethod
     @property
-    def MASS_UNITS(cls) -> float:
+    def MASS_UNITS(cls) -> dict[str, Union[int, float]]:
         return cls._MASS_UNITS
 
     @classmethod
     @property
-    def DISP_UNITS(cls) -> float:
+    def DISP_UNITS(cls) -> dict[str, Union[float, int]]:
         return cls._DISP_UNITS
 
     @classmethod
     @property
-    def VELOCITY_UNITS(cls) -> float:
+    def VELOCITY_UNITS(cls) -> dict[str, Union[int, float]]:
         return cls._VELOCITY_UNITS
 
     @classmethod
     @property
-    def TIME_UNITS(cls) -> float:
+    def TIME_UNITS(cls) -> dict[str, Union[float, int]]:
         return cls._TIME_UNITS

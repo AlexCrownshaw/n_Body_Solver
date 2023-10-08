@@ -318,17 +318,17 @@ class Results:
             n_filter = range(len(self._bodies))
 
         if fig is None:
-            fig = plt.figure(figsize=(10, 10))
+            fig = plt.figure(figsize=(7, 7))
 
         for n in n_filter:
             v_data = np.array([self._bodies[n].data.v_x.iloc[iter_range[0]:iter_range[1]],
                                self._bodies[n].data.v_y.iloc[iter_range[0]:iter_range[1]],
                                self._bodies[n].data.v_z.iloc[iter_range[0]:iter_range[1]]])
-            v_mag = [np.linalg.norm(v_data[:, i]) for i in range(v_data.shape[1])]
-            plt.plot(self._bodies[n].data.time.iloc[iter_range[0]:iter_range[1]], v_mag, label=f"n: {n}")
+            v_mag = [np.linalg.norm(v_data[:, i]) / Constants.VELOCITY_UNITS["kmps"] for i in range(v_data.shape[1])]
+            plt.plot(self._bodies[n].data.time.iloc[iter_range[0]:iter_range[1]] / Constants.TIME_UNITS["year"], v_mag, label=f"n: {n}")
 
-        plt.xlabel("Time [s]")
-        plt.ylabel("Velocity Magnitude [m/s]")
+        plt.xlabel("Time [Years]")
+        plt.ylabel("Velocity Magnitude [Km/s]")
         plt.legend()
         plt.grid()
 

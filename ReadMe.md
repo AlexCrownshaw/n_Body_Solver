@@ -122,3 +122,46 @@ def main():
 if __name__ == "__main__":
     main()
 ```
+
+### Complex Solver
+For the use of complex modules that require some external computation at run time such as a satellite attitude control system, the solver must be configured manually.
+```python
+import numpy as np
+
+from n_body_solver import Solver
+from n_body_solver import Body
+from n_body_solver import RBody
+from n_body_solver import Constants
+
+
+""" PARAMETERS START """
+ITERATIONS = 32000
+DT = 4
+""" PARAMETERS STOP """
+
+def main():
+    n1 = Body(m=5.972e24, x=[0, 0, 0])
+
+    # orbiting small body
+    orbit_radius = 7e6
+    orbital_velocity = np.sqrt((Constants.G * n1.m) / orbit_radius)
+    satellite = RBody(m=1, x=[orbit_radius, 0, 0], v=[0, orbital_velocity, 0], i=[0.1, 0.1, 0.1])
+
+    solver = Solver(bodies=[n1, satellite], iterations=ITERATIONS, dt=DT)
+    solver.init_solver()
+    
+    # Here a satellite torque vector in cartesian form could be computed by a simulated control system
+    T = [10, 0, 0]
+
+    for iteration in range(1, solver.iterations):
+        t = iteration * satellite.dt
+        solver.compute_iteration()
+        satellite.compute_rotation(T=T)
+        satellite.store_state(i=iteration, t=t)
+
+        solver.print_debug(i=iteration)
+        
+if __name__ == "__main__":
+    main()
+
+```
