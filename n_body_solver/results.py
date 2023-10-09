@@ -85,7 +85,9 @@ class Results:
 
         if path is None:
             path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "solutions", self._name)
-            os.mkdir(path)
+        else:
+            path = os.path.join(path, self._name)
+        os.mkdir(path)
 
         for n, body in enumerate(self._bodies):
             body_path = os.path.join(path, f"n_{n}")
