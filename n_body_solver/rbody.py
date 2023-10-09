@@ -103,7 +103,8 @@ class RBody(Body):
         self._x_ang = state_vector[:3]
         self._v_ang = state_vector[3:]
         self._T = T
-        self._q = Quaternion.euler_to_quaternion(e_vec=self._x_ang)
+        q_vec = Quaternion.euler_to_quaternion(e_vec=self._x_ang)
+        self._q = Quaternion.quaternion_dot(q1=q_vec, q2=self._q)
 
     def store_state(self, i: int, t: float) -> None:
         """

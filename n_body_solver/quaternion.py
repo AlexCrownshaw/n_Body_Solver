@@ -15,42 +15,39 @@ class Quaternion:
         cos_psi, cos_theta, cos_phi = np.cos(e_vec[0]), np.cos(e_vec[1]), np.cos(e_vec[2])
         sin_psi, sin_theta, sin_phi = np.sin(e_vec[0]), np.sin(e_vec[1]), np.sin(e_vec[2])
 
-        r = np.zeros(4)
-        r[0] = (cos_phi * cos_theta * cos_psi) + (sin_phi * sin_theta * sin_psi)
-        r[1] = (sin_phi * cos_theta * cos_psi) - (cos_phi * sin_theta * sin_psi)
-        r[2] = (cos_phi * sin_theta * cos_psi) + (sin_phi * cos_theta * sin_psi)
-        r[3] = (cos_phi * cos_theta * sin_psi) - (sin_phi * sin_theta * cos_psi)
+        q = np.zeros(4)
+        q[0] = (cos_phi * cos_theta * cos_psi) + (sin_phi * sin_theta * sin_psi)
+        q[1] = (sin_phi * cos_theta * cos_psi) - (cos_phi * sin_theta * sin_psi)
+        q[2] = (cos_phi * sin_theta * cos_psi) + (sin_phi * cos_theta * sin_psi)
+        q[3] = (cos_phi * cos_theta * sin_psi) - (sin_phi * sin_theta * cos_psi)
 
-        r_mag = np.sqrt(r[0] ** 2 + r[1] ** 2 + r[2] ** 2 + r[3] ** 2)
-        r_unit = r / r_mag
-
-        return r_unit, r_mag
+        return q
 
     @staticmethod
-    def quaternion_to_euler(r: np.array) -> np.array:
+    def quaternion_to_euler(q: np.array) -> np.array:
         """
 
-        :param r: quaternion matrix
+        :param q: quaternion matrix
         return: euler angle vector
         """
 
         e = np.zeros(3)
-        e[0] = np.arctan2(2 * ((r[0] * r[3]) + (r[1] * r[2])), (r[0]**2 + r[1]**2 - r[2]**2 - r[3]**2))
-        e[1] = np.arcsin(2 * ((r[0] * r[2]) - (r[1] * r[3])))
-        e[2] = np.arctan2(2 * ((r[0] * r[1]) + (r[2] * r[3])), (r[0]**2 - r[1]**2 - r[2]**2 + r[3]**2))
+        e[0] = np.arctan2(2 * ((q[0] * q[3]) + (q[1] * q[2])), (q[0]**2 + q[1]**2 - q[2]**2 - q[3]**2))
+        e[1] = np.arcsin(2 * ((q[0] * q[2]) - (q[1] * q[3])))
+        e[2] = np.arctan2(2 * ((q[0] * q[1]) + (q[2] * q[3])), (q[0]**2 - q[1]**2 - q[2]**2 + q[3]**2))
 
         return np.degrees(e)
 
     @staticmethod
-    def quaternion_dot(r1: np.array, r2: np.array) -> np.array:
+    def quaternion_dot(q1: np.array, q2: np.array) -> np.array:
         """
 
-        :param r1:
-        :param r2:
+        :param q1:
+        :param q2:
         :return:
         """
 
-        return np.array([r1[0]*r2[0] - r1[1]*r2[1] - r1[2]*r2[2] - r1[3]*r2[3],
-                         r1[0]*r2[1] + r1[1]*r2[0] + r1[2]*r2[3] - r1[3]*r2[2],
-                         r1[0]*r2[2] - r1[1]*r2[3] + r1[2]*r2[0] + r1[3]*r2[1],
-                         r1[0]*r2[3] + r1[1]*r2[2] - r1[2]*r2[1] + r1[3]*r2[0]])
+        return np.array([q1[0]*q2[0] - q1[1]*q2[1] - q1[2]*q2[2] - q1[3]*q2[3],
+                         q1[0]*q2[1] + q1[1]*q2[0] + q1[2]*q2[3] - q1[3]*q2[2],
+                         q1[0]*q2[2] - q1[1]*q2[3] + q1[2]*q2[0] + q1[3]*q2[1],
+                         q1[0]*q2[3] + q1[1]*q2[2] - q1[2]*q2[1] + q1[3]*q2[0]])
