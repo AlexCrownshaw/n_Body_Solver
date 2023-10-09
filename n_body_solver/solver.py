@@ -97,6 +97,7 @@ class Solver:
         :return:
         """
 
+        self._t = t
         state_vec = np.array([self._get_state_vector(n=n) for n in range(len(self._bodies))])
         state_vec = self._rk4.compute(dt=self._dt, state_vec=state_vec)
         self._update_bodies(state_vec=state_vec, i=i, t=t)
