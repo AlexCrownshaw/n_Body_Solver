@@ -250,6 +250,10 @@ class Results:
                                        fargs=(frame_data, int(iter_step), n_filter), interval=50, blit=False)
 
         if save:
+            plot_dir = os.path.join(self.solution_path, "Plots")
+            if not os.path.isdir(plot_dir):
+                os.mkdir(plot_dir)
+
             writer_gif = animation.PillowWriter(fps=60)
             file_path = os.path.join(self._solution_path, "Plots", f"Solution_Animation_{len(n_filter)}n.gif")
             anim.save(filename=file_path, writer=writer_gif)
