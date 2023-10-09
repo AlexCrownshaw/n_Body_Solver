@@ -9,7 +9,7 @@ from n_body_solver.constants import Constants
 
 class Solver:
 
-    def __init__(self, bodies: list[Body], iterations: float = 100, dt: float = 1, debug=True):
+    def __init__(self, bodies: list[Body], iterations: int, dt: float, debug=True):
         """
 
         :param bodies:
@@ -22,7 +22,7 @@ class Solver:
         self._bodies: list[np.array] = bodies
         self._rk4 = RK4(func=self._compute_state_derivative)
 
-        self._iterations: float = iterations
+        self._iterations: int = iterations
         self._dt: float = dt
         self._t: float = 0
 
@@ -36,7 +36,7 @@ class Solver:
         return self._bodies
 
     @property
-    def iterations(self) -> float:
+    def iterations(self) -> int:
         return self._iterations
 
     @property
