@@ -89,14 +89,17 @@ class Solver:
 
         return state_derivative
 
-    def compute_iteration(self) -> np.array:
+    def compute_iteration(self, i: int, t: float) -> np.array:
         """
 
+        :param i:
+        :param t:
         :return:
         """
 
         state_vec = np.array([self._get_state_vector(n=n) for n in range(len(self._bodies))])
         state_vec = self._rk4.compute(dt=self._dt, state_vec=state_vec)
+        self._update_bodies(state_vec=state_vec, i=i, t=t)
 
         return state_vec
 
@@ -113,7 +116,7 @@ class Solver:
 
         return vec
 
-    def update_bodies(self, state_vec: np.array, i: int, t: float) -> None:
+    def _update_bodies(self, state_vec: np.array, i: int, t: float) -> None:
         """
 
         :param state_vec:
@@ -135,7 +138,7 @@ class Solver:
         """
 
         state_vec = np.array([self._get_state_vector(n=n) for n in range(len(self._bodies))])
-        self.update_bodies(state_vec=state_vec, i=0, t=self._t)
+        self._update_bodies(state_vec=state_vec, i=0, t=self._t)
         self.print_debug(i=0)
 
     def solve(self) -> Results:
@@ -149,13 +152,11 @@ class Solver:
         for i in np.arange(1, self._iterations):
             self._t = i * self._dt
 
-            state_vec = self.compute_iteration()
-
             for body in self._bodies:
                 if type(body) is RBody:
                     body.compute_rotation()
 
-            self.update_bodies(state_vec=state_vec, i=i, t=self._t)
+            self.compute_iteration(i=i, t=self._t)
 
             self.print_debug(i=i)
 

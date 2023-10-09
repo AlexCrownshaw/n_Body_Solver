@@ -154,10 +154,9 @@ def main():
     T = [10, 0, 0]
 
     for iteration in range(1, solver.iterations):
-        t = iteration * satellite.dt
-        solver.compute_iteration()
+        time = iteration * satellite.dt
         satellite.compute_rotation(T=T)
-        satellite.store_state(i=iteration, t=t)
+        solver.compute_iteration(i=iteration, t=time)
 
         solver.print_debug(i=iteration)
         
