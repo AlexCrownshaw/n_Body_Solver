@@ -88,7 +88,6 @@ def main():
     results.plot_trajectory(show=True)
     results.animate_solution()
 
-
     
 if __name__ == "__main__":
     main()
@@ -160,6 +159,7 @@ def main():
 
         solver.print_debug(i=iteration)
         
+        
 if __name__ == "__main__":
     main()
 
@@ -187,6 +187,7 @@ def main():
     # Obviously multiplying a quaternion by its inverse is pointless but it shows a dot_product usage example
     q_1 = Quaternion.dot_product(q1=q, q2=q_inv)
 
+    
 if __name__ == "__main__":
     main()
 ```
