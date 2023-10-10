@@ -36,21 +36,21 @@ class Body:
             raise Exception(f"ERROR: Invalid velocity unit. Choose from {Constants.VELOCITY_UNITS.keys()}")
 
         """ Scalar declarations """
-        self._m: float = self.convert_to_kg(mass=m, unit=self._m_unit)
+        self._m: float = m * Constants.MASS_UNITS[self._m_unit]
 
         """ Cartesian vector declarations """
         self._F_g: np.array = np.zeros(3)
-        self._x: np.array = self.convert_to_meters(vec=np.array(x), unit=self._x_unit)
+        self._x: np.array = np.array(x * Constants.DISP_UNITS[self._x_unit])
 
         if v is None:
-            self._v = np.zeros(3)
+            self._v: np.array = np.zeros(3)
         else:
-            self._v = self.convert_to_mps(vec=np.array(v), unit=self._v_unit)
+            self._v: np.array = np.array(v * Constants.VELOCITY_UNITS[self._v_unit])
 
         if a is None:
-            self._a = np.zeros(3)
+            self._a: np.array = np.zeros(3)
         else:
-            self._a = self.convert_to_meters(vec=np.array(a), unit=self._x_unit)
+            self._a: np.array = np.array(a * Constants.DISP_UNITS[self._x_unit])
 
         """ State vector declaration """
         self._state_vec = np.array([self._x, self._v, self._a])
@@ -148,36 +148,3 @@ class Body:
                                            self._v[0], self._v[1], self._v[2],
                                            self._a[0], self._a[1], self._a[2],
                                            self._F_g[0], self._F_g[1], self._F_g[2]]
-
-    @staticmethod
-    def convert_to_kg(mass: float, unit: str) -> float:
-        """
-
-        :param mass:
-        :param unit:
-        :return:
-        """
-
-        return mass * Constants.MASS_UNITS[unit]
-
-    @staticmethod
-    def convert_to_meters(vec: np.array, unit: str) -> np.array:
-        """
-
-        :param vec:
-        :param unit:
-        :return:
-        """
-
-        return vec * Constants.DISP_UNITS[unit]
-
-    @staticmethod
-    def convert_to_mps(vec: np.array, unit: str) -> np.array:
-        """
-
-        :param vec:
-        :param unit:
-        :return:
-        """
-
-        return vec * Constants.VELOCITY_UNITS[unit]
