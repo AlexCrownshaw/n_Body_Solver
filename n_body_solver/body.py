@@ -40,17 +40,17 @@ class Body:
 
         """ Cartesian vector declarations """
         self._F_g: np.array = np.zeros(3)
-        self._x: np.array = np.array(x * Constants.DISP_UNITS[self._x_unit])
+        self._x: np.array = np.array(x) * Constants.DISP_UNITS[self._x_unit]
 
         if v is None:
             self._v: np.array = np.zeros(3)
         else:
-            self._v: np.array = np.array(v * Constants.VELOCITY_UNITS[self._v_unit])
+            self._v: np.array = np.array(v) * Constants.VELOCITY_UNITS[self._v_unit]
 
         if a is None:
             self._a: np.array = np.zeros(3)
         else:
-            self._a: np.array = np.array(a * Constants.DISP_UNITS[self._x_unit])
+            self._a: np.array = np.array(a) * Constants.DISP_UNITS[self._x_unit]
 
         """ State vector declaration """
         self._state_vec = np.array([self._x, self._v, self._a])
