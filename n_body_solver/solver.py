@@ -22,7 +22,7 @@ class Solver:
         self._bodies: list[np.array] = bodies
         self._rk4 = RK4(func=self._compute_state_derivative)
 
-        self._iterations: int = iterations
+        self._iterations: int = int(iterations)
         self._dt: float = dt
         self._t: float = 0
 
