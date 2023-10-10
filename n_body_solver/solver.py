@@ -170,7 +170,7 @@ class Solver:
         """
 
         if self._debug:
-            print(f"\nInstance: {i}, Time: {self._t} s")
+            print(f"\nInstance: {i}, Time: {round(self._t, 3)} s")
             for n, body in enumerate(self._bodies):
                 print(f"""n: {n}
                              \tx: {np.round(body.x)}
