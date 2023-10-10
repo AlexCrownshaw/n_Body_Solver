@@ -43,7 +43,7 @@ class RBody(Body):
         else:
             self._v_ang = np.zeros(3)
 
-        self._q = Quaternion.euler_to_quaternion(e_vec=self._x_ang)
+        self._q = Quaternion.from_euler(e=self._x_ang)
 
         for header in ["psi", "theta", "phi", "psi_dot", "theta_dot", "phi_dot", "T_psi", "T_theta", "T_phi"]:
             self._data[header] = []
@@ -102,10 +102,10 @@ class RBody(Body):
 
         self._T = T
 
-        q_vec = Quaternion.euler_to_quaternion(e_vec=state_vector[:3])
-        self._q = Quaternion.quaternion_dot(q1=q_vec, q2=self._q)
+        q_vec = Quaternion.from_euler(e=state_vector[:3])
+        self._q = Quaternion.dot_product(q1=q_vec, q2=self._q)
 
-        self._x_ang = Quaternion.quaternion_to_euler(q=self._q)
+        self._x_ang = Quaternion.to_euler(q=self._q)
         self._v_ang = state_vector[3:]
 
     def store_state(self, i: int, t: float) -> None:

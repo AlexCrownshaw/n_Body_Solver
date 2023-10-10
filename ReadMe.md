@@ -164,3 +164,32 @@ if __name__ == "__main__":
     main()
 
 ```
+
+## Using the Quaternion submodule
+This project contains an abstract class that can be used to manipulate rotations using the quaternion rotation system
+```python
+from n_body_solver import Quaternion
+
+def main():
+    # Define right hand Tait-Bryan Euler angle matrix in degrees
+    e = [45, 45, 45]
+
+    # Get quaternion representation of euler angle
+    q = Quaternion.from_euler(e=e)
+    
+    # Plot rotation as a cartesian coordinate system
+    Quaternion.plot_quaternion(q=q)
+    
+    # Get quaternion inverse
+    q_inv = Quaternion.inverse(q=q)
+    
+    # Get dot product of two quaternions q_1 = q_inv * q = 0
+    # Obviously multiplying a quaternion by its inverse is pointless but it shows a dot_product usage example
+    q_1 = Quaternion.dot_product(q1=q, q2=q_inv)
+
+if __name__ == "__main__":
+    main()
+```
+
+![alt text](https://github.com/AlexCrownshaw/n_Body_Solver/blob/master/n_body_solver/solutions/Quaternions/Quaternion_rotation_plot.png "TOrbit Solution")
+
