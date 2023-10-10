@@ -107,7 +107,7 @@ class Quaternion:
 
         ax.plot([0, 1], [0, 0], [0, 0], color="r", linestyle="--")
         ax.plot([0, 0], [0, 1], [0, 0], color="g", linestyle="--")
-        ax.plot([0, 0], [0, 0], [0, 1], color="b", linestyle="--")
+        ax.plot([0, 0], [0, 0], [0, -1], color="b", linestyle="--")
 
         ax.set(xlim=(-1, 1))
         ax.set(ylim=(-1, 1))
