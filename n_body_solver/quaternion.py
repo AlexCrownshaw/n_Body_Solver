@@ -1,3 +1,7 @@
+import os
+import sys
+import time
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -130,12 +134,15 @@ class Quaternion:
         return fig
 
     @classmethod
-    def animate_rotation(cls, q_data: Union[list, np.array, pd.DataFrame], frames: int = 100, show=True) -> None:
+    def animate_rotation(cls, q_data: Union[list, np.array, pd.DataFrame], frames: int = 100, show: bool = True,
+                         save: bool = False, path: str = None) -> None:
         """
 
         :param q_data:
         :param frames:
         :param show:
+        :param save:
+        :param path:
         :return:
         """
 
@@ -152,6 +159,14 @@ class Quaternion:
 
         anim = animation.FuncAnimation(fig=fig, func=cls._update_frame_data, frames=frames,
                                        fargs=(frame_data, q_data, iter_step, ax), interval=50, blit=False)
+
+        if save:
+            if path is None:
+                path = os.path.dirname(sys.argv[0])
+
+            writer_gif = animation.PillowWriter(fps=60)
+            file_path = os.path.join(path, f"Rotation_Anim_{str(time.strftime('%d-%m-%y_%H-%M-%S'))}.gif")
+            anim.save(filename=file_path, writer=writer_gif)
 
         if show:
             plt.show()
