@@ -1,5 +1,9 @@
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+
+from typing import Union
 
 
 class Quaternion:
@@ -36,9 +40,9 @@ class Quaternion:
         """
 
         e = np.zeros(3)
-        e[0] = np.arctan2(2 * ((q[0] * q[3]) + (q[1] * q[2])), (q[0]**2 + q[1]**2 - q[2]**2 - q[3]**2))
+        e[0] = np.arctan2(2 * ((q[0] * q[3]) + (q[1] * q[2])), (q[0] ** 2 + q[1] ** 2 - q[2] ** 2 - q[3] ** 2))
         e[1] = np.arcsin(2 * ((q[0] * q[2]) - (q[1] * q[3])))
-        e[2] = np.arctan2(2 * ((q[0] * q[1]) + (q[2] * q[3])), (q[0]**2 - q[1]**2 - q[2]**2 + q[3]**2))
+        e[2] = np.arctan2(2 * ((q[0] * q[1]) + (q[2] * q[3])), (q[0] ** 2 - q[1] ** 2 - q[2] ** 2 + q[3] ** 2))
 
         return np.degrees(e)
 
@@ -51,10 +55,10 @@ class Quaternion:
         :return: q2 * q1
         """
 
-        return np.array([q1[0]*q2[0] - q1[1]*q2[1] - q1[2]*q2[2] - q1[3]*q2[3],
-                         q1[0]*q2[1] + q1[1]*q2[0] + q1[2]*q2[3] - q1[3]*q2[2],
-                         q1[0]*q2[2] - q1[1]*q2[3] + q1[2]*q2[0] + q1[3]*q2[1],
-                         q1[0]*q2[3] + q1[1]*q2[2] - q1[2]*q2[1] + q1[3]*q2[0]])
+        return np.array([q1[0] * q2[0] - q1[1] * q2[1] - q1[2] * q2[2] - q1[3] * q2[3],
+                         q1[0] * q2[1] + q1[1] * q2[0] + q1[2] * q2[3] - q1[3] * q2[2],
+                         q1[0] * q2[2] - q1[1] * q2[3] + q1[2] * q2[0] + q1[3] * q2[1],
+                         q1[0] * q2[3] + q1[1] * q2[2] - q1[2] * q2[1] + q1[3] * q2[0]])
 
     @staticmethod
     def inverse(q: np.array) -> np.array:
@@ -87,10 +91,11 @@ class Quaternion:
         return p_prime[1:]
 
     @classmethod
-    def plot_quaternion(cls, q: list) -> None:
+    def plot_quaternion(cls, q: list, show: bool = True) -> plt.Figure:
         """
 
         :param q:
+        :param show:
         :return:
         """
 
@@ -119,4 +124,60 @@ class Quaternion:
 
         plt.legend()
 
-        plt.show()
+        if show:
+            plt.show()
+
+        return fig
+
+    @classmethod
+    def animate_rotation(cls, q_data: Union[list, np.array, pd.DataFrame], frames: int = 100, show=True) -> None:
+        """
+
+        :param q_data:
+        :param frames:
+        :param show:
+        :return:
+        """
+
+        if type(q_data) is pd.DataFrame:
+            q_data = q_data.to_numpy()
+        elif type(q_data) is list:
+            q_data = np.array(q_data)
+
+        iter_step = int(len(q_data) / frames)
+
+        fig = cls.plot_quaternion(q_data[0], show=False)
+        ax = fig.get_axes()[0]
+        frame_data = ax.get_children()[: 3]
+
+        anim = animation.FuncAnimation(fig=fig, func=cls._update_frame_data, frames=frames,
+                                       fargs=(frame_data, q_data, iter_step, ax), interval=50, blit=False)
+
+        if show:
+            plt.show()
+
+    @classmethod
+    def _update_frame_data(cls, num: int, frame_data: list, q_data: np.array, iter_step: int, ax: plt.Axes) -> list:
+        """
+
+        :param num:
+        :param frame_data:
+        :param q_data:
+        :param iter_step:
+        :return:
+        """
+
+        q = q_data[num * iter_step]
+
+        p_x = cls.rotate_point(p=[1, 0, 0], q=q, active=True)
+        p_y = cls.rotate_point(p=[0, 1, 0], q=q, active=True)
+        p_z = cls.rotate_point(p=[0, 0, -1], q=q, active=True)
+
+        for artist in frame_data:
+            artist.remove()
+
+        frame_data[0] = ax.quiver(0, 0, 0, p_x[0], p_x[1], p_x[2], length=1, color="r", label="x")
+        frame_data[1] = ax.quiver(0, 0, 0, p_y[0], p_y[1], p_y[2], length=1, color="g", label="y")
+        frame_data[2] = ax.quiver(0, 0, 0, p_z[0], p_z[1], p_z[2], length=1, color="b", label="z")
+
+        return frame_data
