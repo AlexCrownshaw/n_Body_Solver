@@ -92,6 +92,22 @@ class RBody(Body):
     def v_ang(self, value: np.array) -> None:
         self._v_ang = value
 
+    def get_quaternion_data(self, iter_range: list = None) -> np.array:
+        """
+
+        :param iter_range:
+        :return:
+        """
+
+        if iter_range is None:
+            iter_range = [0, len(self._data.iteration)]
+
+        q_data = np.zeros(shape=(iter_range[1], 4))
+        for index in range(iter_range[0], iter_range[1]):
+            q_data[index, :] = Quaternion.from_euler(e=[self._data.psi.iloc[index], self._data.theta.iloc[index], self._data.phi.iloc[index]])
+
+        return q_data
+
     def update_rotation_state(self, state_vector: np.array, T: np.array) -> None:
         """
 
