@@ -168,6 +168,8 @@ if __name__ == "__main__":
 ## Using the Quaternion submodule
 This project contains an abstract class that can be used to manipulate rotations using the quaternion rotation system
 ```python
+import os
+
 from n_body_solver import Quaternion
 from n_body_solver import Results
 
@@ -185,7 +187,7 @@ def main():
     solution_path = r"C:\Dev\n_Body_Solver\n_body_solver\solutions\2n_4e3iter_126128460et_11-10-23_20-39-29"
     results = Results(solution_path=solution_path)
     q_data = results.bodies[1].get_quaternion_data(iter_range=[0, 100])
-    Quaternion.animate_rotation(q_data=q_data, frames=100)
+    Quaternion.animate_rotation(q_data=q_data, frames=100, path=os.path.join(solution_path, "Plots"))
     
     # Get quaternion inverse
     q_inv = Quaternion.inverse(q=q)
