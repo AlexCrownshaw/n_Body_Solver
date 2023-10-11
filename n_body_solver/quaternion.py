@@ -160,7 +160,7 @@ class Quaternion:
         anim = animation.FuncAnimation(fig=fig, func=cls._update_frame_data, frames=frames,
                                        fargs=(frame_data, q_data, iter_step, ax), interval=50, blit=False)
 
-        if save:
+        if save or path is not None:
             if path is None:
                 path = os.path.dirname(sys.argv[0])
 
