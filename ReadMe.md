@@ -204,4 +204,4 @@ if __name__ == "__main__":
     main()
 ```
 
-![alt text](https://github.com/AlexCrownshaw/n_Body_Solver/blob/master/n_body_solver/solutions\2n_4e3iter_126128460et_11-10-23_20-39-29\Plots\Rotation_Anim_11-10-23_22-54-18.gif " rotation_animation")
+![alt text](https://github.com/AlexCrownshaw/n_Body_Solver/blob/master/n_body_solver/solutions/2n_4e3iter_126128460et_11-10-23_20-39-29/Plots/Rotation_Anim_11-10-23_22-54-18.gif " rotation_animation")
