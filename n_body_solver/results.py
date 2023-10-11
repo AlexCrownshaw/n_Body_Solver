@@ -8,6 +8,7 @@ import matplotlib.animation as animation
 import pandas as pd
 
 from n_body_solver.body import Body
+from n_body_solver.rbody import RBody
 from n_body_solver import Constants
 
 
@@ -69,7 +70,8 @@ class Results:
 
         body_params = [None] * len(self._bodies)
         for n, body in enumerate(self._bodies):
-            body_params[n] = {"n": n, "mass": body.m, "x_ic": [float(body.x_ic[i]) for i in range(3)], "v_ic": [float(body.v_ic[i]) for i in range(3)]}
+            body_params[n] = body.get_body_params()
+            body_params[n]["n"] = n
 
         return {"iter": round(max([len(body.data) for body in self._bodies])),
                 "et": max([max(body.data.time) for body in self._bodies]),
@@ -118,9 +120,14 @@ class Results:
         for body_dir_name in body_dir_names:
             n = int(body_dir_name.replace("n_", ""))
             body_data = pd.read_csv(os.path.join(solution_path, body_dir_name, f"n_{n}_data.csv"))
-            x_ic = [body_data.x.iloc[0], body_data.y.iloc[0], body_data.z.iloc[0]]
-            v_ic = [body_data.v_x.iloc[0], body_data.v_y.iloc[0], body_data.v_z.iloc[0]]
-            bodies[n] = Body(m=body_params[n]["mass"], x=x_ic, v=v_ic, data=body_data)
+
+            if body_params[n]["type"] == "body":
+                bodies[n] = Body(m=body_params[n]["mass"], x=body_params[n]["x_init"], v=body_params[n]["v_init"], data=body_data)
+            elif body_params[n]["type"] == "rbody":
+                bodies[n] = RBody(m=body_params[n]["mass"], x=body_params[n]["x_init"], v=body_params[n]["v_init"],
+                                  x_ang=body_params[n]["x_ang_init"], v_ang=body_params[n]["v_ang_init"], data=body_data)
+            else:
+                raise Exception(f"ERROR: body type {body_params[n]['type']} is not recognised by Results class")
 
         self._bodies = bodies
         self._solution_path = solution_path
@@ -243,7 +250,7 @@ class Results:
         plt.legend()
 
         title = ""
-        for part in [f"m{n}: {np.round(body.m/Constants.MASS_UNITS['sm'], 3)} [SM] --- x{n}_init: {np.round(body.x_ic/Constants.DISP_UNITS['au'], 3)} [AU] --- v{n}_init: {np.round(body.v_ic/Constants.VELOCITY_UNITS['kmps'], 3)} [Km/s]"
+        for part in [f"m{n}: {np.round(body.m/Constants.MASS_UNITS['sm'], 3)} [SM] --- x{n}_init: {np.round(body.x_init/Constants.DISP_UNITS['au'], 3)} [AU] --- v{n}_init: {np.round(body.v_init/Constants.VELOCITY_UNITS['kmps'], 3)} [Km/s]"
                      for n, body in enumerate(self._bodies) if n in n_filter]:
             title = f"{title}\n{part}"
         plt.title(title)

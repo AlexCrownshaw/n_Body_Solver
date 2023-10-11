@@ -66,8 +66,8 @@ class Body:
                                                "F_x", "F_y", "F_z"])
 
         """ Store Initial Conditions """
-        self._x_ic: np.array = self._x
-        self._v_ic: np.array = self._v
+        self._x_init: np.array = self._x
+        self._v_init: np.array = self._v
 
     @property
     def m(self) -> float:
@@ -130,12 +130,12 @@ class Body:
         return self._v_unit
 
     @property
-    def x_ic(self) -> np.array:
-        return self._x_ic
+    def x_init(self) -> np.array:
+        return self._x_init
 
     @property
-    def v_ic(self) -> np.array:
-        return self._v_ic
+    def v_init(self) -> np.array:
+        return self._v_init
 
     def store_state(self, i: int, t: float) -> None:
         """
@@ -148,3 +148,11 @@ class Body:
                                            self._v[0], self._v[1], self._v[2],
                                            self._a[0], self._a[1], self._a[2],
                                            self._F_g[0], self._F_g[1], self._F_g[2]]
+
+    def get_body_params(self) -> dict:
+        """
+
+        :return:
+        """
+
+        return {"n": 0, "type": "body", "mass": self.m, "x_init": [float(self.x_init[i]) for i in range(3)], "v_init": [float(self.v_init[i]) for i in range(3)]}

@@ -43,10 +43,14 @@ class RBody(Body):
         else:
             self._v_ang = np.zeros(3)
 
+        self._x_ang_init = self._x_ang
+        self._v_ang_init = self._v_ang
+
         self._q = Quaternion.from_euler(e=self._x_ang)
 
-        for header in ["psi", "theta", "phi", "psi_dot", "theta_dot", "phi_dot", "T_psi", "T_theta", "T_phi"]:
-            self._data[header] = []
+        if len(self._data) == 0:
+            for header in ["psi", "theta", "phi", "psi_dot", "theta_dot", "phi_dot", "T_psi", "T_theta", "T_phi"]:
+                self._data[header] = []
 
         self._rk4 = RK4(func=self._compute_state_derivative)
 
@@ -92,37 +96,13 @@ class RBody(Body):
     def v_ang(self, value: np.array) -> None:
         self._v_ang = value
 
-    def get_quaternion_data(self, iter_range: list = None) -> np.array:
-        """
+    @property
+    def x_ang_init(self) -> np.array:
+        return self._x_ang_init
 
-        :param iter_range:
-        :return:
-        """
-
-        if iter_range is None:
-            iter_range = [0, len(self._data.iteration)]
-
-        q_data = np.zeros(shape=(iter_range[1], 4))
-        for index in range(iter_range[0], iter_range[1]):
-            q_data[index, :] = Quaternion.from_euler(e=[self._data.psi.iloc[index], self._data.theta.iloc[index], self._data.phi.iloc[index]])
-
-        return q_data
-
-    def update_rotation_state(self, state_vector: np.array, T: np.array) -> None:
-        """
-
-        :param state_vector:
-        :param T:
-        :return:
-        """
-
-        self._T = T
-
-        q_vec = Quaternion.from_euler(e=state_vector[:3])
-        self._q = Quaternion.dot_product(q1=q_vec, q2=self._q)
-
-        self._x_ang = Quaternion.to_euler(q=self._q)
-        self._v_ang = state_vector[3:]
+    @property
+    def v_ang_init(self) -> np.array:
+        return self._v_ang_init
 
     def store_state(self, i: int, t: float) -> None:
         """
@@ -141,6 +121,47 @@ class RBody(Body):
                                            self._v_ang[0], self.v_ang[1], self.v_ang[2],
                                            self._T[0], self._T[1], self._T[2]]
 
+    def get_quaternion_data(self, iter_range: list = None) -> np.array:
+        """
+
+        :param iter_range:
+        :return:
+        """
+
+        if iter_range is None:
+            iter_range = [0, len(self._data.iteration)]
+
+        q_data = np.zeros(shape=(iter_range[1], 4))
+        for index in range(iter_range[0], iter_range[1]):
+            q_data[index, :] = Quaternion.from_euler(e=[self._data.psi.iloc[index], self._data.theta.iloc[index], self._data.phi.iloc[index]])
+
+        return q_data
+
+    def get_body_params(self) -> dict:
+        """
+
+        :return:
+        """
+
+        return {"n": 0, "type": "rbody", "mass": self.m, "x_init": [float(self._x_init[i]) for i in range(3)], "v_init": [float(self._v_init[i]) for i in range(3)],
+                "x_ang_init": [float(self._x_ang_init[i]) for i in range(3)], "v_ang_init": [float(self._v_ang_init[i]) for i in range(3)]}
+
+    def _update_body_rotation(self, state_vector: np.array, T: np.array) -> None:
+        """
+
+        :param state_vector:
+        :param T:
+        :return:
+        """
+
+        self._T = T
+
+        q_vec = Quaternion.from_euler(e=state_vector[:3])
+        self._q = Quaternion.dot_product(q1=q_vec, q2=self._q)
+
+        self._x_ang = Quaternion.to_euler(q=self._q)
+        self._v_ang = state_vector[3:]
+
     def compute_rotation(self, T: np.array) -> np.array:
         """
 
@@ -153,7 +174,7 @@ class RBody(Body):
 
         state_vector = self.get_state_vector()
         state_vector = self._rk4.compute(dt=self._dt, state_vec=state_vector, args=[T])
-        self.update_rotation_state(state_vector=state_vector, T=T)
+        self._update_body_rotation(state_vector=state_vector, T=T)
 
     def get_state_vector(self) -> np.array:
         """

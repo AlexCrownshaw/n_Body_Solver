@@ -169,6 +169,7 @@ if __name__ == "__main__":
 This project contains an abstract class that can be used to manipulate rotations using the quaternion rotation system
 ```python
 from n_body_solver import Quaternion
+from n_body_solver import Results
 
 def main():
     # Define right hand Tait-Bryan Euler angle matrix in degrees
@@ -180,17 +181,25 @@ def main():
     # Plot rotation as a cartesian coordinate system
     Quaternion.plot_quaternion(q=q)
     
+    # Animate rotation using quaternion data. To do this we will load an n_body_solver solution.
+    solution_path = r"C:\Dev\n_Body_Solver\n_body_solver\solutions\2n_4e3iter_126128460et_11-10-23_20-39-29"
+    results = Results(solution_path=solution_path)
+    q_data = results.bodies[1].get_quaternion_data(iter_range=[0, 100])
+    Quaternion.animate_rotation(q_data=q_data, frames=100)
+    
     # Get quaternion inverse
     q_inv = Quaternion.inverse(q=q)
     
-    # Get dot product of two quaternions q_1 = q_inv * q = 0
-    # Obviously multiplying a quaternion by its inverse is pointless but it shows a dot_product usage example
+    # Get dot product of two quaternions [q_1 = q_inv * q = 0]
+    # Obviously multiplying a quaternion by its inverse is pointless, but it shows a dot_product usage example
     q_1 = Quaternion.dot_product(q1=q, q2=q_inv)
+    
+    # The original Euler angle can be recovered [e1 = e]
+    e1 = Quaternion.to_euler(q=q)
 
     
 if __name__ == "__main__":
     main()
 ```
 
-![alt text](https://github.com/AlexCrownshaw/n_Body_Solver/blob/master/n_body_solver/solutions/Quaternions/Quaternion_rotation_plot.png "TOrbit Solution")
-
+![alt text](https://github.com/AlexCrownshaw/n_Body_Solver/blob/master/n_body_solver/solutions\2n_4e3iter_126128460et_11-10-23_20-39-29\Plots\Solution_Animation_2n.gif " rotation_animation")
