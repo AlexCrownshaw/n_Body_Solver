@@ -183,11 +183,14 @@ def main():
     # Plot rotation as a cartesian coordinate system
     Quaternion.plot_quaternion(q=q)
     
-    # Animate rotation using quaternion data. To do this we will load an n_body_solver solution.
-    solution_path = r"C:\Dev\n_Body_Solver\n_body_solver\solutions\2n_4e3iter_126128460et_11-10-23_20-39-29"
+    # Animate rotation using quaternion data. To do this we will load a solution. The solution in questions shows an
+    # under-damped PID loop commanding a psi (about Z) rotation by 90 degrees"""
+    solution_path = r"n_body_solver/solutions/2n_1e3iter_100et_12-10-23_12-58-38"
     results = Results(solution_path=solution_path)
-    q_data = results.bodies[1].get_quaternion_data(iter_range=[0, 100])
-    Quaternion.animate_rotation(q_data=q_data, frames=100, path=os.path.join(solution_path, "Plots"))
+
+    # The first 300 iterations of the quaternion rotation data are isolated, then animated and saved.
+    q_data = results.bodies[1].get_quaternion_data(iter_range=[0, 300])
+    Quaternion.animate_rotation(q_data=q_data, frames=300, path=os.path.join(solution_path, "Plots"))
     
     # Get quaternion inverse
     q_inv = Quaternion.inverse(q=q)
@@ -204,4 +207,4 @@ if __name__ == "__main__":
     main()
 ```
 
-![alt text](https://github.com/AlexCrownshaw/n_Body_Solver/blob/master/n_body_solver/solutions/2n_10e3iter_1000et_11-10-23_23-06-47/Plots/Rotation_Anim_11-10-23_23-07-40.gif " rotation_animation")
+![alt text](https://github.com/AlexCrownshaw/n_Body_Solver/blob/master/n_body_solver/solutions/2n_1e3iter_100et_12-10-23_12-58-38/Plots/Rotation_Anim_12-10-23_12-59-25.gif " rotation_animation")
