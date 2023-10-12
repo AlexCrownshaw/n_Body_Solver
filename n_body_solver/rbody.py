@@ -104,23 +104,6 @@ class RBody(Body):
     def v_ang_init(self) -> np.array:
         return self._v_ang_init
 
-    # def store_state(self, i: int, t: float) -> None:
-    #     """
-    #
-    #     :param i:
-    #     :param t:
-    #     :return:
-    #     """
-    #
-    #     self._data.loc[len(self._data)] = [i, t,
-    #                                        self._x[0], self._x[1], self._x[2],
-    #                                        self._v[0], self._v[1], self._v[2],
-    #                                        self._a[0], self._a[1], self._a[2],
-    #                                        self._F_g[0], self._F_g[1], self._F_g[2],
-    #                                        self._x_ang[0], self._x_ang[1], self._x_ang[2],
-    #                                        self._v_ang[0], self.v_ang[1], self.v_ang[2],
-    #                                        self._T[0], self._T[1], self._T[2]]
-
     def get_state_data(self) -> list:
         """
 
