@@ -1,6 +1,5 @@
 # n_Body_Solver
-The n_Body_Solver uses a direct numerical simulation approach to solve the infamous n body problem. 
-A 4th order Runge-Kutta numerical integration method is used for accurate and low computation analysis. 
+This projects uses a direct numerical simulation approach to solve the infamous n-body problem. A 4th order Runge-Kutta numerical integration method is used for accurate analysis of Newton's Law of Gravity.
 ## Installation
 Latest release version 0.1:
 ```commandline
