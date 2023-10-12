@@ -8,6 +8,8 @@ from n_body_solver.quaternion import Quaternion
 
 class RBody(Body):
 
+    _DATA_HEADERS = ["psi", "theta", "phi", "psi_dot", "theta_dot", "phi_dot", "T_psi", "T_theta", "T_phi"]
+
     def __init__(self, m: float, x: list, v: list = None, a: list = None, x_ang: list = None, v_ang: list = None,
                  i: list = None, m_unit: str = "kg", x_unit: str = "m", data: pd.DataFrame = None):
         """
@@ -23,6 +25,8 @@ class RBody(Body):
         :param x_unit:
         :param data:
         """
+
+        self._DATA_HEADERS = super()._DATA_HEADERS + self._DATA_HEADERS
 
         super().__init__(m=m, x=x, v=v, a=a, m_unit=m_unit, x_unit=x_unit, data=data)
 
@@ -47,10 +51,6 @@ class RBody(Body):
         self._v_ang_init = self._v_ang
 
         self._q = Quaternion.from_euler(e=self._x_ang)
-
-        if len(self._data) == 0:
-            for header in ["psi", "theta", "phi", "psi_dot", "theta_dot", "phi_dot", "T_psi", "T_theta", "T_phi"]:
-                self._data[header] = []
 
         self._rk4 = RK4(func=self._compute_state_derivative)
 
@@ -104,22 +104,34 @@ class RBody(Body):
     def v_ang_init(self) -> np.array:
         return self._v_ang_init
 
-    def store_state(self, i: int, t: float) -> None:
+    # def store_state(self, i: int, t: float) -> None:
+    #     """
+    #
+    #     :param i:
+    #     :param t:
+    #     :return:
+    #     """
+    #
+    #     self._data.loc[len(self._data)] = [i, t,
+    #                                        self._x[0], self._x[1], self._x[2],
+    #                                        self._v[0], self._v[1], self._v[2],
+    #                                        self._a[0], self._a[1], self._a[2],
+    #                                        self._F_g[0], self._F_g[1], self._F_g[2],
+    #                                        self._x_ang[0], self._x_ang[1], self._x_ang[2],
+    #                                        self._v_ang[0], self.v_ang[1], self.v_ang[2],
+    #                                        self._T[0], self._T[1], self._T[2]]
+
+    def get_state_data(self) -> list:
         """
 
-        :param i:
-        :param t:
         :return:
         """
 
-        self._data.loc[len(self._data)] = [i, t,
-                                           self._x[0], self._x[1], self._x[2],
-                                           self._v[0], self._v[1], self._v[2],
-                                           self._a[0], self._a[1], self._a[2],
-                                           self._F_g[0], self._F_g[1], self._F_g[2],
-                                           self._x_ang[0], self._x_ang[1], self._x_ang[2],
-                                           self._v_ang[0], self.v_ang[1], self.v_ang[2],
-                                           self._T[0], self._T[1], self._T[2]]
+        state_data = super().get_state_data()
+
+        return state_data + [self._x_ang[0], self._x_ang[1], self._x_ang[2],
+                             self._v_ang[0], self.v_ang[1], self.v_ang[2],
+                             self._T[0], self._T[1], self._T[2]]
 
     def get_quaternion_data(self, iter_range: list = None) -> np.array:
         """
@@ -133,7 +145,8 @@ class RBody(Body):
 
         q_data = np.zeros(shape=(iter_range[1], 4))
         for index in range(iter_range[0], iter_range[1]):
-            q_data[index, :] = Quaternion.from_euler(e=[self._data.psi.iloc[index], self._data.theta.iloc[index], self._data.phi.iloc[index]])
+            q_data[index, :] = Quaternion.from_euler(
+                e=[self._data.psi.iloc[index], self._data.theta.iloc[index], self._data.phi.iloc[index]])
 
         return q_data
 
@@ -143,8 +156,10 @@ class RBody(Body):
         :return:
         """
 
-        return {"n": 0, "type": "rbody", "mass": self.m, "x_init": [float(self._x_init[i]) for i in range(3)], "v_init": [float(self._v_init[i]) for i in range(3)],
-                "x_ang_init": [float(self._x_ang_init[i]) for i in range(3)], "v_ang_init": [float(self._v_ang_init[i]) for i in range(3)]}
+        return {"n": 0, "type": "rbody", "mass": self.m, "x_init": [float(self._x_init[i]) for i in range(3)],
+                "v_init": [float(self._v_init[i]) for i in range(3)],
+                "x_ang_init": [float(self._x_ang_init[i]) for i in range(3)],
+                "v_ang_init": [float(self._v_ang_init[i]) for i in range(3)]}
 
     def _update_body_rotation(self, state_vector: np.array, T: np.array) -> None:
         """

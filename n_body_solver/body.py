@@ -1,10 +1,13 @@
 import numpy as np
 import pandas as pd
 
+from typing import Union
 from n_body_solver.constants import Constants
 
 
 class Body:
+    _DATA_BLOCK_SIZE = 1000
+    _DATA_HEADERS = ["iteration", "time", "x", "y", "z", "v_x", "v_y", "v_z", "a_x", "a_y", "a_z", "F_x", "F_y", "F_z"]
 
     def __init__(self, m: float, x: list, v: list = None, a: list = None, m_unit: str = "kg", x_unit: str = "m",
                  v_unit: str = "mps", data: pd.DataFrame = None):
@@ -57,13 +60,9 @@ class Body:
 
         """ Data frame declaration """
         if data is not None:
-            self._data = data
+            self._data = [data]
         else:
-            self._data = pd.DataFrame(columns=["iteration", "time",
-                                               "x", "y", "z",
-                                               "v_x", "v_y", "v_z",
-                                               "a_x", "a_y", "a_z",
-                                               "F_x", "F_y", "F_z"])
+            self._data = [self.create_data_block()]
 
         """ Store Initial Conditions """
         self._x_init: np.array = self._x
@@ -114,8 +113,15 @@ class Body:
         self._state_vec = value
 
     @property
-    def data(self) -> pd.DataFrame:
+    def data(self) -> Union[list, pd.DataFrame]:
         return self._data
+
+    @data.setter
+    def data(self, value: pd.DataFrame) -> None:
+        if type(value) is not pd.DataFrame:
+            raise Exception("ERROR: data.setter only allows use for combining data blocks for post processing")
+
+        self._data = value
 
     @property
     def m_unit(self) -> str:
@@ -137,17 +143,38 @@ class Body:
     def v_init(self) -> np.array:
         return self._v_init
 
+    def create_data_block(self) -> pd.DataFrame:
+        """
+
+        :return:
+        """
+
+        return pd.DataFrame(np.zeros(shape=(self._DATA_BLOCK_SIZE, len(self._DATA_HEADERS))),
+                            columns=self._DATA_HEADERS)
+
     def store_state(self, i: int, t: float) -> None:
         """
 
         :return:
         """
 
-        self._data.loc[len(self._data)] = [i, t,
-                                           self._x[0], self._x[1], self._x[2],
-                                           self._v[0], self._v[1], self._v[2],
-                                           self._a[0], self._a[1], self._a[2],
-                                           self._F_g[0], self._F_g[1], self._F_g[2]]
+        index = i % self._DATA_BLOCK_SIZE
+
+        if index == 0 and i != 0:
+            self._data.append(self.create_data_block())
+
+        self._data[-1].loc[index] = [i, t] + self.get_state_data()
+
+    def get_state_data(self) -> list:
+        """
+
+        :return:
+        """
+
+        return [self._x[0], self._x[1], self._x[2],
+                self._v[0], self._v[1], self._v[2],
+                self._a[0], self._a[1], self._a[2],
+                self._F_g[0], self._F_g[1], self._F_g[2]]
 
     def get_body_params(self) -> dict:
         """
@@ -155,4 +182,5 @@ class Body:
         :return:
         """
 
-        return {"n": 0, "type": "body", "mass": self.m, "x_init": [float(self.x_init[i]) for i in range(3)], "v_init": [float(self.v_init[i]) for i in range(3)]}
+        return {"n": 0, "type": "body", "mass": self.m, "x_init": [float(self.x_init[i]) for i in range(3)],
+                "v_init": [float(self.v_init[i]) for i in range(3)]}

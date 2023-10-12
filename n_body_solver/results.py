@@ -23,6 +23,7 @@ class Results:
 
         if bodies is not None:
             self._bodies: list[np.array] = bodies
+            self._merge_data_blocks()
             self._solution_path: str = ""
             self._name: str = self.get_solution_name()
             self._solver_params: dict = self.get_solver_params()
@@ -50,6 +51,14 @@ class Results:
     @solution_path.setter
     def solution_path(self, value: str) -> None:
         self._solution_path = value
+
+    def _merge_data_blocks(self) -> None:
+        for body in self._bodies:
+            merged_data = pd.DataFrame()
+            for data_block in body.data:
+                merged_data = pd.concat([merged_data, data_block], axis=0)
+
+            body.data = merged_data
 
     def get_solution_name(self) -> str:
         """
