@@ -8,7 +8,8 @@ from n_body_solver.quaternion import Quaternion
 
 class RBody(Body):
 
-    _DATA_HEADERS = ["psi", "theta", "phi", "psi_dot", "theta_dot", "phi_dot", "T_psi", "T_theta", "T_phi"]
+    _DATA_HEADERS = ["psi", "theta", "phi", "psi_dot", "theta_dot", "phi_dot", "T_psi", "T_theta", "T_phi",
+                     "q_w", "q_x", "q_y", "q_z"]
 
     def __init__(self, m: float, x: list, v: list = None, a: list = None, x_ang: list = None, v_ang: list = None,
                  i: list = None, m_unit: str = "kg", x_unit: str = "m", data: pd.DataFrame = None):
@@ -114,7 +115,8 @@ class RBody(Body):
 
         return state_data + [self._x_ang[0], self._x_ang[1], self._x_ang[2],
                              self._v_ang[0], self.v_ang[1], self.v_ang[2],
-                             self._T[0], self._T[1], self._T[2]]
+                             self._T[0], self._T[1], self._T[2],
+                             self._q[0], self._q[1], self._q[2], self._q[3]]
 
     def get_quaternion_data(self, iter_range: list = None) -> np.array:
         """
@@ -128,8 +130,7 @@ class RBody(Body):
 
         q_data = np.zeros(shape=(iter_range[1], 4))
         for index in range(iter_range[0], iter_range[1]):
-            q_data[index, :] = Quaternion.from_euler(
-                e=[self._data.psi.iloc[index], self._data.theta.iloc[index], self._data.phi.iloc[index]])
+            q_data[index, :] = [self._data.q_w.iloc[index], self._data.q_x.iloc[index], self._data.q_y.iloc[index], self._data.q_z.iloc[index]]
 
         return q_data
 
@@ -187,7 +188,7 @@ class RBody(Body):
 
     def _compute_state_derivative(self, state_vector: np.array, T: np.array) -> np.array:
         """
-
+        dq/dt = 0.5*q*v
         :param state_vector:
         :param T:
         :return:
