@@ -13,15 +13,29 @@ from typing import Union
 class Quaternion:
 
     @staticmethod
-    def from_euler(e: np.array) -> np.array:
+    def to_array(vec: Union[list, np.array, pd.DataFrame]) -> np.array:
+        """
+
+        :param vec:
+        :return:
+        """
+
+        if type(vec) is pd.DataFrame:
+            vec = vec.to_numpy()
+        elif type(vec) is list:
+            vec = np.array(vec)
+
+        return vec
+
+    @classmethod
+    def from_euler(cls, e: Union[list, np.array]) -> np.array:
         """
         Returns a quaternion matrix from a right hand Tait-Bryan Euler angle matrix
         :param e: right hand Tait-Bryan Euler angle matrix
         return: quaternion matrix
         """
 
-        if type(e) is list:
-            e = np.array(e)
+        e = cls.to_array(vec=e)
 
         e = np.radians(e / 2)
         cos_psi, cos_theta, cos_phi = np.cos(e[0]), np.cos(e[1]), np.cos(e[2])
@@ -35,13 +49,15 @@ class Quaternion:
 
         return q
 
-    @staticmethod
-    def to_euler(q: np.array) -> np.array:
+    @classmethod
+    def to_euler(cls, q: Union[list, np.array]) -> np.array:
         """
         Returns a right hand Tait-Bryan Euler angle matrix from a quaternion matrix
         :param q: quaternion matrix
         return: euler angle vector
         """
+
+        q = cls.to_array(vec=q)
 
         e = np.zeros(3)
         e[0] = np.arctan2(2 * ((q[0] * q[3]) + (q[1] * q[2])), (q[0] ** 2 + q[1] ** 2 - q[2] ** 2 - q[3] ** 2))
@@ -50,22 +66,31 @@ class Quaternion:
 
         return np.degrees(e)
 
-    @staticmethod
-    def dot_product(q1: np.array, q2: np.array) -> np.array:
+    @classmethod
+    def dot_product(cls, q1: Union[list, np.array], q2: Union[list, np.array], norm: bool = False) -> np.array:
         """
         Quaternion dot product multiplication (Non-commutable)
         :param q1:
         :param q2:
+        :param norm:
         :return: q2 * q1
         """
 
-        return np.array([q1[0] * q2[0] - q1[1] * q2[1] - q1[2] * q2[2] - q1[3] * q2[3],
-                         q1[0] * q2[1] + q1[1] * q2[0] + q1[2] * q2[3] - q1[3] * q2[2],
-                         q1[0] * q2[2] - q1[1] * q2[3] + q1[2] * q2[0] + q1[3] * q2[1],
-                         q1[0] * q2[3] + q1[1] * q2[2] - q1[2] * q2[1] + q1[3] * q2[0]])
+        q1 = cls.to_array(vec=q1)
+        q2 = cls.to_array(vec=q2)
 
-    @staticmethod
-    def inverse(q: np.array) -> np.array:
+        q_r = np.array([q1[0] * q2[0] - q1[1] * q2[1] - q1[2] * q2[2] - q1[3] * q2[3],
+                        q1[0] * q2[1] + q1[1] * q2[0] + q1[2] * q2[3] - q1[3] * q2[2],
+                        q1[0] * q2[2] - q1[1] * q2[3] + q1[2] * q2[0] + q1[3] * q2[1],
+                        q1[0] * q2[3] + q1[1] * q2[2] - q1[2] * q2[1] + q1[3] * q2[0]])
+
+        if norm:
+            q_r = cls.normalise(q=q_r)
+
+        return q_r
+
+    @classmethod
+    def inverse(cls, q: Union[list, np.array]) -> np.array:
         """
 
         :param q:
@@ -75,7 +100,17 @@ class Quaternion:
         return np.array([q[0], -q[1], -q[2], -q[3]])
 
     @classmethod
-    def rotate_point(cls, p: np.array, q: np.array, active: bool = True) -> np.array:
+    def normalise(cls, q: Union[list, np.array]) -> np.array:
+        """
+
+        :param q:
+        :return:
+        """
+
+        return np.array(q / np.sqrt(q[0] ** 2 + q[1] ** 2 + q[2] ** 2 + q[3] ** 2))
+
+    @classmethod
+    def rotate_point(cls, p: Union[list, np.array], q: Union[list, np.array], active: bool = True) -> np.array:
         """
 
         :param p:
@@ -85,6 +120,8 @@ class Quaternion:
         """
 
         p = np.array([0, p[0], p[1], p[2]])
+
+        q = cls.to_array(vec=q)
         q_inv = cls.inverse(q=q)
 
         if active:
@@ -95,13 +132,15 @@ class Quaternion:
         return p_prime[1:]
 
     @classmethod
-    def plot_quaternion(cls, q: list, show: bool = True) -> plt.Figure:
+    def plot_quaternion(cls, q: Union[list, np.array], show: bool = True) -> plt.Figure:
         """
 
         :param q:
         :param show:
         :return:
         """
+
+        q = cls.to_array(vec=q)
 
         p_x = cls.rotate_point(p=[1, 0, 0], q=q, active=True)
         p_y = cls.rotate_point(p=[0, 1, 0], q=q, active=True)
@@ -146,10 +185,7 @@ class Quaternion:
         :return:
         """
 
-        if type(q_data) is pd.DataFrame:
-            q_data = q_data.to_numpy()
-        elif type(q_data) is list:
-            q_data = np.array(q_data)
+        q_data = cls.to_array(vec=q_data)
 
         iter_step = int(len(q_data) / frames)
 

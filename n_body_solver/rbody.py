@@ -58,11 +58,11 @@ class RBody(Body):
         self._dt: float = None
 
     @property
-    def q(self) -> np.array:
+    def T(self) -> np.array:
         return self._T
 
-    @q.setter
-    def q(self, value: np.array) -> None:
+    @T.setter
+    def T(self, value: np.array) -> None:
         self._T = value
 
     @property
@@ -156,7 +156,7 @@ class RBody(Body):
         self._T = T
 
         q_vec = Quaternion.from_euler(e=state_vector[:3])
-        self._q = Quaternion.dot_product(q1=q_vec, q2=self._q)
+        self._q = Quaternion.dot_product(q1=q_vec, q2=self._q, norm=True)
 
         self._x_ang = Quaternion.to_euler(q=self._q)
         self._v_ang = state_vector[3:]
@@ -188,7 +188,7 @@ class RBody(Body):
 
     def _compute_state_derivative(self, state_vector: np.array, T: np.array) -> np.array:
         """
-        dq/dt = 0.5*q*v
+
         :param state_vector:
         :param T:
         :return:
