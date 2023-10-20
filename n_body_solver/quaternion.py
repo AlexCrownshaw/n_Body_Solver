@@ -107,7 +107,9 @@ class Quaternion:
         :return:
         """
 
-        return np.array(q / np.sqrt(q[0] ** 2 + q[1] ** 2 + q[2] ** 2 + q[3] ** 2))
+        mag = np.sqrt(q[0] ** 2 + q[1] ** 2 + q[2] ** 2 + q[3] ** 2)
+        x = np.array(q / mag)
+        return np.array(q / mag)
 
     @classmethod
     def rotate_point(cls, p: Union[list, np.array], q: Union[list, np.array], active: bool = True) -> np.array:
